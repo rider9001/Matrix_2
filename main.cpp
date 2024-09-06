@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "inc/Matrix.h"
+#include "inc/Complex.h"
 
 using std::cout;
 using std::endl;
@@ -32,7 +33,11 @@ void print(Matrix<T> mat)
 
 int main()
 {
-    auto mat = Matrix<double>({{5,6,9},{2,1,6},{1,2,3}});
+
+    auto mat = Matrix<Complex_C_t>({
+        {{1,1},{1,2}},
+        {{3,2},{2,1}}
+    });
 
     print(mat);
     cout << "-----------------" << endl;

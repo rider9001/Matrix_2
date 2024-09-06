@@ -431,12 +431,13 @@ class Matrix
 
             size_t workingRow = _find_zeros_row();
 
-            T det = 0;
+            T det;
             for (size_t j = 0; j < m_cols; j++)
             {
                 if (get(workingRow, j) != 0)
                 {
-                    det += get(workingRow, j) * cofactor(workingRow, j);
+                    T res = get(workingRow, j) * cofactor(workingRow, j);
+                    det += T;
                 }
             }
 
