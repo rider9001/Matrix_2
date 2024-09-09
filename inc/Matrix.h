@@ -31,7 +31,7 @@ class Matrix
         /// @param cols number of columns to allocate
         ///
         /// @throws std::invalid_argument if rows/cols < 1
-        Matrix(const size_t rows, const size_t cols)
+        Matrix(const size_t& rows, const size_t& cols)
         {
             if (rows < 1 or cols < 1)
             {
@@ -46,7 +46,7 @@ class Matrix
 
         /// @brief Constructor using
         /// @param matData array of arrays to pipe into matrix
-        Matrix(std::initializer_list<std::initializer_list<T>> matData)
+        Matrix(const std::initializer_list<std::initializer_list<T>>& matData)
         {
             if (matData.size() == 0)
             {
@@ -279,6 +279,7 @@ class Matrix
             return !(*this == mat);
         };
 
+        ///--------------------------------------------------------
         /// @brief Operator overload of *, implements number multiplication of matrix
         ///
         /// @note all numbers cast to double to ensure floating point compatability
@@ -305,7 +306,7 @@ class Matrix
         /// @param col to get value from
         ///
         /// @returns value at given location
-        T get(const size_t row, const size_t col) const
+        T get(const size_t& row, const size_t& col) const
         {
             return m_data[_trans_coord(row, col)];
         };
@@ -315,7 +316,7 @@ class Matrix
         /// @param row to set value at
         /// @param col to set value at
         /// @param val to set coordinate to
-        void set(const size_t row, const size_t col, const T val)
+        void set(const size_t& row, const size_t& col, const T& val)
         {
             m_data[_trans_coord(row, col)] = val;
         };
@@ -349,6 +350,7 @@ class Matrix
             return m_cols;
         };
 
+        ///--------------------------------------------------------
         /// @brief Create the transpose of the matrix
         ///
         /// @return the transposed form of the matrix
@@ -368,13 +370,14 @@ class Matrix
             return transposeMat;
         };
 
+        ///--------------------------------------------------------
         /// @brief Returns the sub matrix defined by exculding the row and col given
         ///
         /// @param row to exclude when creating new matrix
         /// @param col to exclude when creating new matrix
         ///
         /// @returns matrix of (m-1,n-1) size with given row/col excluded
-        Matrix<T> createSubMatrix(const size_t row, const size_t col) const
+        Matrix<T> createSubMatrix(const size_t& row, const size_t& col) const
         {
             Matrix<T> outMat(m_rows-1, m_cols-1);
 
@@ -403,28 +406,31 @@ class Matrix
             return outMat;
         };
 
+        ///--------------------------------------------------------
         /// @brief Finds the minor of the matrix at point (i,j)
         ///
         /// @param i row to find minor for
         /// @param j col to find minor for
         ///
         /// @returns value of minor at (i,j)
-        T minor(const size_t i, const size_t j) const
+        T minor(const size_t& i, const size_t& j) const
         {
             return createSubMatrix(i,j).determinant();
         };
 
+        ///--------------------------------------------------------
         /// @brief Finds the cofactor of the matrix at point (i,j)
         ///
         /// @param i row to find cofactor for
         /// @param j col to find cofactor for
         ///
         /// @returns value of cofactor at (i,j)
-        T cofactor(const size_t i, const size_t j) const
+        T cofactor(const size_t& i, const size_t& j) const
         {
             return minor(i,j) * pow(-1, i + j);
         };
 
+        ///--------------------------------------------------------
         /// @brief Calculates the determinant for the matrix
         ///
         /// @returns value of the determinant for the matrix
@@ -459,6 +465,7 @@ class Matrix
             return det;
         };
 
+        ///--------------------------------------------------------
         /// @brief Calculates the adjoint matrix
         ///
         /// @returns the adjoint matrix of the matrix
@@ -477,6 +484,7 @@ class Matrix
             return outMat.transpose();
         };
 
+        ///--------------------------------------------------------
         /// @brief Calculate the inverse matrix
         ///
         /// @return the inverse matrix
@@ -491,7 +499,13 @@ class Matrix
             return adjoint() / det;
         };
 
-        static Matrix<T> identity(const size_t len)
+        ///--------------------------------------------------------
+        /// @brief Creates an identity matrix of size len
+        ///
+        /// @param len side length of the identity matrix
+        ///
+        /// @return identity matrix of requested size
+        static Matrix<T> identity(const size_t& len)
         {
             Matrix<T> id(len, len);
             for (size_t i = 0; i < len; i++)
@@ -522,6 +536,7 @@ class Matrix
         /// @brief the number of rows in the matrix
         size_t m_rows;
 
+        ///--------------------------------------------------------
         /// @brief Translates a coordinate to the index location of the value
         ///
         /// @param row coord to translate
@@ -530,7 +545,7 @@ class Matrix
         /// @returns index to offset memory pointer to
         ///
         /// @throws std::invalid_argument if row/col location is out of bounds
-        size_t _trans_coord(const size_t row, const size_t col) const
+        size_t _trans_coord(const size_t& row, const size_t& col) const
         {
            if (!_check_bounds(row, col))
            {
@@ -541,6 +556,7 @@ class Matrix
            return row * m_cols + col;
         };
 
+        ///--------------------------------------------------------
         /// @brief Finds the row containing the most zeros
         ///
         /// @note if no zeros are found, row 1 (0) will be returned
@@ -579,21 +595,52 @@ class Matrix
         /// @param col of coordinate (j in common notation)
         ///
         /// @returns is coordinate in bounds of this array?
-        bool _check_bounds(const size_t row, const size_t col) const
+        bool _check_bounds(const size_t& row, const size_t& col) const
         {
             // True if both coords are in bounds
             return (row < m_rows) and (col < m_cols);
         };
 
+        ///--------------------------------------------------------
         /// @brief Generates the string needed for the error reporting for a bad coord
         ///
         /// @param row offending coord row
         /// @param col offending coord col
         /// @return string of error message
-        std::string _gen_coord_err_string(const size_t row, const size_t col) const
+        std::string _gen_coord_err_string(const size_t& row, const size_t& col) const
         {
             std::stringstream err;
             err << "Bad coordinate, (" << row << "," << col << ") is not within the bounds of (" << m_rows - 1 << "," << m_cols - 1 << ")";
             return err.str();
         };
 };
+
+///--------------------------------------------------------
+/// @brief Overload of <<, used to convert matrix into an output stream
+///
+/// @param os output stream
+/// @param mat matrix to push to output stream
+///
+/// @return output stream
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<T>& mat)
+{
+    for (size_t i = 0; i < mat.getRowCount(); i++)
+    {
+        for (size_t j = 0; j < mat.getColCount(); j++)
+        {
+            os << mat.get(i,j);
+            if (j+1 != mat.getColCount())
+            {
+                os << ", ";
+            }
+        }
+
+        if (i+1 != mat.getRowCount())
+        {
+            os << std::endl;
+        }
+    }
+
+    return os;
+}

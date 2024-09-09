@@ -12,25 +12,6 @@
 using std::cout;
 using std::endl;
 
-template<typename T>
-void print(Matrix<T> mat)
-{
-    for (size_t i = 0; i < mat.getRowCount(); i++)
-    {
-        std::stringstream row;
-        for (size_t j = 0; j < mat.getColCount(); j++)
-        {
-            row << mat.get(i,j);
-            if (j+1 != mat.getColCount())
-            {
-                row << ", ";
-            }
-        }
-
-        cout << row.str() << endl;
-    }
-}
-
 int main()
 {
     auto mat = Matrix<Complex_C_t>({
@@ -38,13 +19,7 @@ int main()
         {{3,2},{2,1}}
     });
 
-    auto test = Matrix<Complex_C_t>::identity(2);
-
-    print(mat);
-    cout << "-----------------" << endl;
-    print(mat.inverse());
-    cout << "-----------------" << endl;
-    print(mat % mat.inverse());
+    cout << mat.transpose() << endl;
 
     return 0;
 }

@@ -264,9 +264,12 @@ bool operator!=(const Complex_C_t& lcom, const double& rreal);
 /// @return equality boolean
 bool operator!=(const double& lreal, const Complex_C_t& rcom);
 
+///--------------------------------------------------------
 /// @brief Overload of <<, used to output string format of complex
+///
 /// @param os output stream
 /// @param com complex number to string convert
+///
 /// @return output stream
 std::ostream& operator<<(std::ostream& os, const Complex_C_t& com);
 
