@@ -90,7 +90,7 @@ class Matrix
         /// @tparam T type stored by matrix
         ///
         /// @param mat reference to copied matrix
-        Matrix(Matrix const& mat)
+        Matrix<T>(Matrix<T> const& mat)
         {
             m_cols = mat.getColCount();
             m_rows = mat.getRowCount();
@@ -105,6 +105,21 @@ class Matrix
         {
             delete[] m_data;
         };
+
+        /// @brief Assignment operator
+        /// @param mat matrix object being assigned from
+        /// @return reference to assigned matrix
+        Matrix<T>& operator=(Matrix<T> const& mat)
+        {
+            m_cols = mat.getColCount();
+            m_rows = mat.getRowCount();
+
+            // assigned so data will already be present, delete old array to resize
+            delete[] m_data;
+            m_data = new T[m_cols * m_rows];
+            memcpy(m_data, mat.get_data(), m_rows * m_cols * sizeof(T));
+            return *this;
+        }
 
         ///--------------------------------------------------------
         /// @brief Operator overload of +, implements matrix addition
@@ -178,6 +193,23 @@ class Matrix
             return outMat;
         }
 
+        /// @brief Operator overload of /, implements number division of matrix
+        ///
+        /// @param num to divide matrix by
+        ///
+        /// @return multiplied matrix
+        Matrix<T> operator/(T const& num)
+        {
+            Matrix<T> outMat(m_rows, m_cols);
+
+            for (size_t i = 0; i < m_rows * m_cols; i++)
+            {
+                outMat.get_data()[i] = m_data[i] / num;
+            }
+
+            return outMat;
+        };
+
         ///--------------------------------------------------------
         /// @brief Operator overload of %, implements matrix cross product
         ///
@@ -200,9 +232,9 @@ class Matrix
                     T sum = 0;
                     for (size_t idx = 0; idx < m_cols; idx++)
                     {
-                        sum += get(i, idx) * mat.get(idx, j);
+                        T product = get(i, idx) * mat.get(idx, j);
+                        sum += product;
                     }
-
                     outMat.set(i,j, sum);
                 }
             }
@@ -227,6 +259,8 @@ class Matrix
             {
                 if (m_data[i] != mat.get_data()[i])
                 {
+                    std::cout << "failed: (" << i / m_cols << "," << i % m_rows << "), " <<
+                    m_data[i] << " != " << mat.get_data()[i] << std::endl;
                     return false;
                 }
             }
@@ -259,25 +293,6 @@ class Matrix
             for (size_t i = 0; i < m_rows * m_cols; i++)
             {
                 outMat.get_data()[i] = m_data[i] * num;
-            }
-
-            return outMat;
-        };
-
-        /// @brief Operator overload of /, implements number division of matrix
-        ///
-        /// @note all numbers cast to double to ensure floating point compatability
-        ///
-        /// @param num to divide matrix by
-        ///
-        /// @return multiplied matrix
-        Matrix<T> operator/(double const& num)
-        {
-            Matrix<T> outMat(m_rows, m_cols);
-
-            for (size_t i = 0; i < m_rows * m_cols; i++)
-            {
-                outMat.get_data()[i] = m_data[i] / num;
             }
 
             return outMat;
@@ -431,13 +446,13 @@ class Matrix
 
             size_t workingRow = _find_zeros_row();
 
-            T det;
+            T det = 0;
             for (size_t j = 0; j < m_cols; j++)
             {
                 if (get(workingRow, j) != 0)
                 {
                     T res = get(workingRow, j) * cofactor(workingRow, j);
-                    det += T;
+                    det += res;
                 }
             }
 
@@ -475,6 +490,27 @@ class Matrix
 
             return adjoint() / det;
         };
+
+        static Matrix<T> identity(const size_t len)
+        {
+            Matrix<T> id(len, len);
+            for (size_t i = 0; i < len; i++)
+            {
+                for (size_t j = 0; j < len; j++)
+                {
+                    if (i==j)
+                    {
+                        id.set(i,j, (T) 1);
+                    }
+                    else
+                    {
+                        id.set(i,j, (T) 0);
+                    }
+                }
+            }
+
+            return id;
+        }
 
     private:
         /// @brief Stores all matrix values, one dimensional to exploit memory adjacency benifits

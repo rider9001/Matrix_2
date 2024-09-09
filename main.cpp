@@ -33,15 +33,18 @@ void print(Matrix<T> mat)
 
 int main()
 {
-
     auto mat = Matrix<Complex_C_t>({
         {{1,1},{1,2}},
         {{3,2},{2,1}}
     });
 
+    auto test = Matrix<Complex_C_t>::identity(2);
+
     print(mat);
     cout << "-----------------" << endl;
-    print(mat.adjoint());
+    print(mat.inverse());
+    cout << "-----------------" << endl;
+    print(mat % mat.inverse());
 
     return 0;
 }
