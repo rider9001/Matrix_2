@@ -500,6 +500,22 @@ class Matrix
         };
 
         ///--------------------------------------------------------
+        /// @brief Returns a matrix with each value of the input reciprocated
+        ///
+        /// @return reciprocated matrix
+        Matrix<T> reciprocal()
+        {
+            Matrix<T> outMat(m_rows, m_cols);
+
+            for (size_t i = 0; i < m_rows * m_cols; i++)
+            {
+                outMat.get_data()[i] = 1 / m_data[i];
+            }
+
+            return outMat;
+        };
+
+        ///--------------------------------------------------------
         /// @brief Creates an identity matrix of size len
         ///
         /// @param len side length of the identity matrix
@@ -547,11 +563,11 @@ class Matrix
         /// @throws std::invalid_argument if row/col location is out of bounds
         size_t _trans_coord(const size_t& row, const size_t& col) const
         {
-           if (!_check_bounds(row, col))
-           {
+            if (!_check_bounds(row, col))
+            {
                std::string err = _gen_coord_err_string(row, col);
                throw std::invalid_argument(err.c_str());
-           }
+            }
 
            return row * m_cols + col;
         };

@@ -285,7 +285,7 @@ Complex_C_t conjugate(const Complex_C_t& com);
 ///
 /// @param com complex number input
 ///
-/// @return argument
+/// @return absolute value of complex number
 double absolute(const Complex_C_t& com);
 
 ///--------------------------------------------------------

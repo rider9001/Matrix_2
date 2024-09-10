@@ -19,7 +19,11 @@ int main()
         {{3,2},{2,1}}
     });
 
-    cout << mat.transpose() << endl;
+    cout << mat << endl;
+    cout << "----------------" << endl;
+    cout << mat.reciprocal() << endl;
+    cout << "----------------" << endl;
+    cout << mat * mat.reciprocal() << endl;
 
     return 0;
 }

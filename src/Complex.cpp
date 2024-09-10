@@ -225,25 +225,20 @@ double argument(const Complex_C_t& com)
     }
 
     double preRotation;
-    if (com.m_real > 0 and com.m_imagine > 0)
+    if (com.m_real > 0)
     {
-        // upper left quad
+        // upper or lower right quad
         preRotation = 0;
     }
     else if (com.m_real < 0 and com.m_imagine > 0)
     {
-        // upper right quad
+        // upper left quad
         preRotation = M_PI_2;
     }
     else if (com.m_real < 0 and com.m_imagine < 0)
     {
         // lower left quad
         preRotation = -M_PI_2;
-    }
-    else if (com.m_real > 0 and com.m_imagine < 0)
-    {
-        // lower left quad
-        preRotation = 0;
     }
 
     return atan(com.m_imagine / com.m_real) + preRotation;
