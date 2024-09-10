@@ -1,11 +1,10 @@
 /// ------------------------------------------
-/// @file Complex.cpp
+/// @file Complex_C.cpp
 ///
-/// @brief Header file for Complex_Cart_t number structure
+/// @brief Soource file for Complex_C_t number structure
 /// ------------------------------------------
 
-#define _USE_MATH_DEFINES
-#include "../inc/Complex.h"
+#include "../inc/Complex_C.h"
 
 ///--------------------------------------------------------
 Complex_C_t operator+(const Complex_C_t& lcom, const Complex_C_t& rcom)
@@ -218,30 +217,35 @@ double absolute(const Complex_C_t& com)
 double argument(const Complex_C_t& com)
 {
     // Implemenation of atan that allows for +/- inf inputs
-    // and scales output to [0, 2pi] range
+    // and scales output to [0, 2pi] range, relative to eastward 0 deg
     if (com.m_real == 0 and com.m_imagine == 0)
     {
         return 0;
     }
 
     double preRotation;
-    if (com.m_real > 0)
+    if (com.m_real > 0 and com.m_imagine < 0)
     {
-        // upper or lower right quad
+        // lower left quad
         preRotation = 0;
+    }
+    else if (com.m_real < 0 and com.m_imagine < 0)
+    {
+        // lower right quad
+        preRotation = M_PI_2;
     }
     else if (com.m_real < 0 and com.m_imagine > 0)
     {
         // upper left quad
-        preRotation = M_PI_2;
+        preRotation = M_PI;
     }
-    else if (com.m_real < 0 and com.m_imagine < 0)
+    else if (com.m_real > 0 and com.m_imagine > 0)
     {
-        // lower left quad
-        preRotation = -M_PI_2;
+        // upper right quad
+        preRotation = M_PI_2 + M_PI;
     }
 
-    return atan(com.m_imagine / com.m_real) + preRotation;
+    return atan(fabs(com.m_imagine) / fabs(com.m_real)) + preRotation;
 }
 
 ///--------------------------------------------------------

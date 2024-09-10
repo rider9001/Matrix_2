@@ -19,11 +19,8 @@ int main()
         {{3,2},{2,1}}
     });
 
-    cout << mat << endl;
-    cout << "----------------" << endl;
-    cout << mat.reciprocal() << endl;
-    cout << "----------------" << endl;
-    cout << mat * mat.reciprocal() << endl;
+    Complex_P_t degTest{2,M_PI};
+    cout << degTest << endl;
 
     return 0;
 }
