@@ -202,50 +202,41 @@ std::ostream& operator<<(std::ostream& os, Complex_C_t const& com)
 }
 
 ///--------------------------------------------------------
-Complex_C_t conjugate(const Complex_C_t& com)
+Complex_C_t Complex_C_t::conjugate() const
 {
-    return Complex_C_t{com.m_real, -com.m_imagine};
+    return Complex_C_t{m_real, -m_imagine};
 }
 
 ///--------------------------------------------------------
-double absolute(const Complex_C_t& com)
+double Complex_C_t::absolute() const
 {
-    return sqrt(pow(com.m_real, 2) + pow(com.m_imagine, 2));
+    return sqrt(pow(m_real, 2) + pow(m_imagine, 2));
 }
 
 ///--------------------------------------------------------
-double argument(const Complex_C_t& com)
+double Complex_C_t::argument() const
 {
     // Implemenation of atan that allows for +/- inf inputs
-    // and scales output to [0, 2pi] range, relative to eastward 0 deg
-    if (com.m_real == 0 and com.m_imagine == 0)
+    // and scales output to [-pi, pi] range, relative to eastward 0 deg
+    if (m_real == 0 and m_imagine == 0)
     {
         return 0;
     }
 
-    double preRotation;
-    if (com.m_real > 0 and com.m_imagine < 0)
+    double preRotation = 0;
+    if (m_real < 0)
     {
-        // lower left quad
-        preRotation = 0;
-    }
-    else if (com.m_real < 0 and com.m_imagine < 0)
-    {
-        // lower right quad
-        preRotation = M_PI_2;
-    }
-    else if (com.m_real < 0 and com.m_imagine > 0)
-    {
-        // upper left quad
-        preRotation = M_PI;
-    }
-    else if (com.m_real > 0 and com.m_imagine > 0)
-    {
-        // upper right quad
-        preRotation = M_PI_2 + M_PI;
+        if (m_imagine > 0)
+        {
+            preRotation = M_PI_2;
+        }
+        else
+        {
+            preRotation = -M_PI_2;
+        }
     }
 
-    return atan(fabs(com.m_imagine) / fabs(com.m_real)) + preRotation;
+    return atan(m_imagine / m_real) + preRotation;
 }
 
 ///--------------------------------------------------------
@@ -275,8 +266,8 @@ Complex_C_t powComplex(const Complex_C_t& base, const Complex_C_t& raise)
     eRaiseComplex(real + imagine)
     */
 
-    double logAbs = log(absolute(base));
-    double arg = argument(base);
+    double logAbs = log(base.absolute());
+    double arg = base.argument();
 
     return raiseEComplex(Complex_C_t{
     logAbs * raise.m_real - raise.m_imagine * arg,

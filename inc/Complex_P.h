@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-#define PI2 (double) (2*M_PI)
+#include "Complex_C.h"
 
 /// @brief Complex number structure, polar form
 struct Complex_P_t
@@ -52,13 +52,22 @@ struct Complex_P_t
 
     ///--------------------------------------------------------
     /// @brief Setter function for the argument that bounds argument
-    /// to [0, 2pi]
+    /// to [-pi, pi]
     ///
     /// @param arg to set m_arg to
-    void Complex_P_t::setArg(const double& arg)
-    {
-        m_mag = fabs(fmod(arg + m_mag, PI2));
-    };
+    void setArg(const double& arg);
+
+    ///--------------------------------------------------------
+    /// @brief gets the real component of the polar complex
+    ///
+    /// @returns real component of the polar complex
+    double real() const;
+
+    ///--------------------------------------------------------
+    /// @brief gets the imaginary component of the polar complex
+    ///
+    /// @returns imaginary component of the polar complex
+    double imaginary() const;
 };
 
 ///--------------------------------------------------------

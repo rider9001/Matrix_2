@@ -47,6 +47,26 @@ struct Complex_C_t
         m_real = real;
         m_imagine = 0;
     };
+
+    ///--------------------------------------------------------
+    /// @brief Find the conjugate of complex number
+    ///
+    /// @return conjugate of complex
+    Complex_C_t conjugate() const;
+
+    /// @brief Find the absolute value of the input com
+    ///
+    /// @return absolute value of complex number
+    double absolute() const;
+
+    ///--------------------------------------------------------
+    /// @brief Find the argument of the input com
+    ///
+    /// @return argument in radians, [-pi, pi] range
+    /// clockwise relative to 1+0i
+    ///
+    /// @note returns 0 if com = 0+0i
+    double argument() const;
 };
 
 ///--------------------------------------------------------
@@ -275,32 +295,6 @@ bool operator!=(const double& lreal, const Complex_C_t& rcom);
 ///
 /// @return output stream
 std::ostream& operator<<(std::ostream& os, const Complex_C_t& com);
-
-///--------------------------------------------------------
-/// @brief Find the conjugate of the input com
-///
-/// @param com complex number input
-///
-/// @return conjugate of input
-Complex_C_t conjugate(const Complex_C_t& com);
-
-/// @brief Find the absolute value of the input com
-///
-/// @param com complex number input
-///
-/// @return absolute value of complex number
-double absolute(const Complex_C_t& com);
-
-///--------------------------------------------------------
-/// @brief Find the argument of the input com
-///
-/// @param com complex number input
-///
-/// @return argument in radians, [0, 2pi] range
-/// clockwise relative to 1+0i
-///
-/// @note returns 0 if com = 0+0i
-double argument(const Complex_C_t& com);
 
 ///--------------------------------------------------------
 /// @brief Raises eulers number by a complex value

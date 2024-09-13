@@ -19,8 +19,9 @@ int main()
         {{3,2},{2,1}}
     });
 
-    Complex_P_t degTest{2,M_PI};
-    cout << degTest << endl;
+    Complex_P_t degTest{2,M_PI / 3};
+    cout << degTest << ", " << polarToCart(degTest) << endl;
+    cout << degTest * 2 << ", " << polarToCart(degTest * 2) << endl;
 
     return 0;
 }
