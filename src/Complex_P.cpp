@@ -204,7 +204,7 @@ std::ostream& operator<<(std::ostream& os, const Complex_P_t& com)
     {
         os << "+";
     }
-    os << std::to_string(fabs(com.m_arg));
+    os << std::to_string(fabs(com.m_arg) / M_PI) << "π";
 
     return os;
 }
