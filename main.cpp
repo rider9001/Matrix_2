@@ -8,20 +8,27 @@
 
 #include "inc/Matrix.h"
 #include "inc/Complex.h"
+#include "inc/Poly.h"
 
 using std::cout;
 using std::endl;
 
 int main()
 {
-    auto mat = Matrix<Complex_C_t>({
-        {{1,1},{1,2}},
-        {{3,2},{2,1}}
-    });
+    // auto mat = Matrix<Complex_C_t>({
+    //     {{1,1},{1,2}},
+    //     {{3,2},{2,1}}
+    // });
 
-    Complex_P_t degTest{2, 1.5 * M_PI};
-    cout << degTest << ", " << polarToCart(degTest) << endl;
-    cout << degTest + 2 << ", " << polarToCart(degTest + 2) << endl;
+    // Complex_P_t degTest{2, M_PI};
+    // cout << degTest << ", " << polarToCart(degTest) << endl;
+    // Complex_P_t test2{6, M_PI / 2};
+    // Complex_P_t res = degTest / test2;
+    // cout << res << ", " << polarToCart(res) << endl;
+
+    std::vector<double> poly = CompressFactors({{1,2},{2,1},{-3,1}});
+
+    printCompressedPoly(poly);
 
     return 0;
 }

@@ -384,8 +384,9 @@ class Matrix
             size_t rowSkip = 0;
             for (size_t i = 0; i < m_rows; i++)
             {
-                if (rowSkip == 0 and i == row)
+                if (rowSkip == 0 && i == row)
                 {
+                    // Skip this row and offset all subsequent writes to new matrix
                     rowSkip = 1;
                     continue;
                 }
@@ -393,8 +394,9 @@ class Matrix
                 size_t colSkip = 0;
                 for (size_t j = 0; j < m_cols; j++)
                 {
-                    if (colSkip == 0 and j == col)
+                    if (colSkip == 0 && j == col)
                     {
+                        // Skip this col and offset all subsequent writes to new matrix
                         colSkip = 1;
                         continue;
                     }
