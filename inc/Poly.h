@@ -12,15 +12,39 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <iostream>
+#include <exception>
 
 #include "Complex.h"
 
+/// @brief Limit for differnce between two iterations where
+/// convergence will be considered to be reached
+#define CONVERGENCE_ITER_LIMIT 1.0E-10
+
+enum MAX_FACTOR_ITER
+{
+    MAX_ITER_LOW = 256,     // 2^8
+    MAX_ITER_MID = 8192,    // 2^13
+    MAX_ITER_HIGH = 262144  // 2^18
+};
+
+
 /// ------------------------------------------
-/// @brief Prints a compressed polynomial
-/// Single line with endl
+/// @brief Cast to ostream for printing polynomial
 ///
+/// @param os output stream
 /// @param poly compressed polynomial to print
-void printCompressedPoly(const std::vector<double>& poly);
+///
+/// @return output ostream
+std::ostream& operator<<(std::ostream& os, const std::vector<Complex_C_t>& poly);
+
+/// ------------------------------------------
+/// @brief Cast to ostream for priting factors
+///
+/// @param os output stream
+/// @param factors factors to print
+///
+/// @return output ostream
+std::ostream& operator<<(std::ostream& os, const std::vector< std::pair<double, Complex_C_t> >& factors);
 
 /// ------------------------------------------
 /// @brief Compresses a list of factors into the minimal form
@@ -28,15 +52,31 @@ void printCompressedPoly(const std::vector<double>& poly);
 /// Returns a list of coefficents, with the index indicating the power
 /// E.g for the example above: x^2 - x - 6 -> {-6, -1, 1}
 ///
-/// @param factorList list of factors stored as pairs, (2x-3) -> <2, -3>
+/// Supports complex factors: (x+2+3i) -> {1, {2,3}}
+///
+/// @param factorList list of factors stored as pairs, (2x-3) -> {2, -3}
 ///
 /// @return list of coefficents for the compressed polynomial
-std::vector<double> CompressFactors(const std::vector< std::pair<double, double> >& factorList);
+std::vector<Complex_C_t> CompressFactors(const std::vector< std::pair<double, Complex_C_t> >& factorList);
 
+/// ------------------------------------------
 /// @brief Using a compressed polynomial coefficent list, return the output for a value of x
 ///
 /// @param x input value
 /// @param compressedPoly compressed polynomial to use as function
 ///
 /// @return output of polynomial function for x
-double getValCompressedPoly(const double x, const std::vector<double>& compressedPoly);
+Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_C_t>& compressedPoly);
+
+/// ------------------------------------------
+/// @brief Factorize the given complex polynomial into all roots
+/// Will not filter non-unique roots
+///
+/// Uses Durand-Kerner method: https://youtu.be/5JcpOj2KtWc
+///
+/// @param compressedPoly complex polynomial
+/// @param max_itr_flag flag for max iterations that will be run,
+/// if convergence is detected then function will halt and return
+///
+/// @return factor list
+std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t> compressedPoly, MAX_FACTOR_ITER max_itr_flag);

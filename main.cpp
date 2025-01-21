@@ -26,9 +26,13 @@ int main()
     // Complex_P_t res = degTest / test2;
     // cout << res << ", " << polarToCart(res) << endl;
 
-    std::vector<double> poly = CompressFactors({{1,2},{2,1},{-3,1}});
+    std::vector<Complex_C_t> poly = CompressFactors({{1,-2},{1,-1}});
 
-    printCompressedPoly(poly);
+    //cout << poly << endl;
+
+    auto factors = FactorizePoly({1,0,1}, MAX_ITER_HIGH);
+
+    cout << factors << endl;
 
     return 0;
 }

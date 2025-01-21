@@ -188,16 +188,19 @@ std::ostream& operator<<(std::ostream& os, Complex_C_t const& com)
     }
     os << std::to_string(fabs(com.m_real));
 
-    if (com.m_imagine < 0)
+    if (com.m_imagine != 0)
     {
-        os << "-";
-    }
-    else
-    {
-        os << "+";
-    }
+        if (com.m_imagine < 0)
+        {
+            os << "-";
+        }
+        else
+        {
+            os << "+";
+        }
 
-    os << std::to_string(fabs(com.m_imagine)) << "i";
+        os << std::to_string(fabs(com.m_imagine)) << "i";
+    }
     return os;
 }
 
