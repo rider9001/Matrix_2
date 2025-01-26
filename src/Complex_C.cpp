@@ -142,13 +142,13 @@ void operator/=(Complex_C_t& lcom, const double& rreal)
 ///--------------------------------------------------------
 bool operator==(const Complex_C_t& lcom, const Complex_C_t& rcom)
 {
-    return (lcom.m_real == rcom.m_real) and (lcom.m_imagine == rcom.m_imagine);
+    return (lcom.m_real == rcom.m_real) && (lcom.m_imagine == rcom.m_imagine);
 }
 
 ///--------------------------------------------------------
 bool operator==(const Complex_C_t& lcom, const double& rreal)
 {
-    return (lcom.m_real == rreal) and (lcom.m_imagine == 0);
+    return (lcom.m_real == rreal) && (lcom.m_imagine == 0);
 }
 
 ///--------------------------------------------------------
@@ -247,7 +247,7 @@ Complex_C_t raiseEComplex(const Complex_C_t& com)
 {
     // e^(b+ic) = (e^b)(e^(ic)) = (e^b)((cos c) + i(sin c))
     // e^(b+ic) = e^b * cos(c) + i * e^b * sin(c)
-    double eb = exp(com.m_real);
+    const double eb = exp(com.m_real);
 
     return Complex_C_t{
         eb * cos(com.m_imagine),
@@ -266,7 +266,7 @@ Complex_C_t powComplex(const Complex_C_t& base, const Complex_C_t& raise)
 
     real = ln(r)*c - d*θ
     imagine = i( d*ln(r) + cθ )
-    eRaiseComplex(real + imagine)
+    raiseEComplex(real + i*imagine)
     */
 
     double logAbs = log(base.absolute());

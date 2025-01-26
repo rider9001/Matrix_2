@@ -11,13 +11,18 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Complex_C_t>& poly)
 {
     for (size_t power = 0; power < poly.size(); power++)
     {
+        if (poly.at(power) == 0.0)
+        {
+            continue;
+        }
+
         if (power == 0)
         {
             os << poly.at(power) << " ";
             continue;
         }
 
-        if (power == 1)
+        if (power == 1.0)
         {
             os << poly.at(power) << "x ";
             continue;
@@ -126,11 +131,13 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
         sum_factors += compressedPoly.at(i) * powComplex(x, i);
     }
 
+    //std::cout << compressedPoly << ", f(" << x << ") = " << sum_factors << std::endl;
+
     return sum_factors;
 }
 
 /// ------------------------------------------
-std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t> compressedPoly, MAX_FACTOR_ITER max_itr_flag)
+std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t>& compressedPoly, MAX_FACTOR_ITER max_itr_flag)
 {
     size_t maxRank = compressedPoly.size() - 1;
 
@@ -141,32 +148,43 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     }
 
     // Create a distribution circle for initial values
-    const double radius = pow( (compressedPoly.at(0).absolute()/compressedPoly.at(maxRank).absolute()), (1/maxRank) );
-
+    const double radius = pow( (compressedPoly.at(0).absolute() / compressedPoly.at(maxRank).absolute()), (1.0 / maxRank) );
     const double start_angle = (2 * M_PI) / maxRank;
-    const double offset = M_PI / (2 * maxRank);
+    const double offset = M_PI / 2 * maxRank;
 
     std::cout << "Radius: " << radius << ", start angle: " << start_angle << std::endl;
 
     std::vector<Complex_C_t> nextValues(maxRank);
     for (size_t i = 0; i < nextValues.size(); i++)
     {
-        nextValues.at(i) = polarToCart({radius, i * start_angle + offset});
+        nextValues.at(i) = polarToCart({radius, (i * start_angle) + offset});
+        nextValues.at(i) *= -1;
+
+        // Fixes an issue with very small values breaking some math functions
+        if (fabs(nextValues.at(i).m_real) < SMALLEST_ALLOWED_START_VAL)
+        {
+            nextValues.at(i).m_real = 0.0;
+        }
+
+        if (fabs(nextValues.at(i).m_imagine) < SMALLEST_ALLOWED_START_VAL)
+        {
+            nextValues.at(i).m_imagine = 0.0;
+        }
     }
 
     // Prevent conjugate pairs and values on the real line
     for (size_t i = 0; i < nextValues.size(); i++)
     {
-        if (nextValues.at(i).m_imagine == 0 || nextValues.at(i).m_real == 0)
+        if (nextValues.at(i).m_real == 0)
         {
-            nextValues.at(i) += Complex_C_t{0.1, 0.1};
+            nextValues.at(i).m_imagine += 0.01;
         }
 
         for (size_t j = 0; j < nextValues.size(); j++)
         {
-            if(nextValues.at(i).conjugate() == nextValues.at(j))
+            if(j != i && abs(nextValues.at(i).conjugate().m_imagine - nextValues.at(j).m_imagine) < CONJUGATE_PROX_LIM)
             {
-                nextValues.at(i).m_imagine += 0.1;
+                nextValues.at(j).m_imagine += 0.01;
             }
         }
     }
@@ -178,14 +196,11 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     }
     std::cout << std::endl;
 
-    std::vector<Complex_C_t> currentValues(maxRank);
+    std::vector<Complex_C_t> currentValues = nextValues;
     size_t iter_count = 0;
-    double iter_delta = __DBL_MAX__;
 
-    while (iter_count < max_itr_flag && iter_delta > CONVERGENCE_ITER_LIMIT)
+    while (iter_count < max_itr_flag)
     {
-        currentValues = nextValues;
-
         for (size_t i = 0; i < currentValues.size(); i++)
         {
             Complex_C_t curVal = currentValues.at(i);
@@ -199,24 +214,20 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
                 }
             }
 
-            //std::cout << "sub pro: " << sub_product << std::endl;
-
             nextValues.at(i) = curVal - (getValCompressedPoly(curVal, compressedPoly) / sub_product);
 
-            // only check convergence every 8 iterations
-            if (iter_count % 8 == 0)
-            {
-                // Find highest delta and set as new iter_delta
-                for (size_t j = 0; j < currentValues.size(); j++)
-                {
-                    double cur_del = (nextValues.at(i) - currentValues.at(i)).absolute();
-                    if (cur_del > iter_delta) iter_delta = cur_del;
-                }
-            }
+            //std::cout << "(" << curVal << ") - (" << getValCompressedPoly(curVal, compressedPoly) << " / " <<  sub_product << ") = " << nextValues.at(i) << std::endl;
         }
 
-        //std::cout << "iteration " << iter_count << " done: " << nextValues << std::endl;
         iter_count++;
+
+        std::cout << "iteration " << iter_count << " done, values:" << std::endl;
+        for (size_t j = 0; j < nextValues.size(); j++)
+        {
+            std::cout << "Root " << (j+1) << ": " << nextValues.at(j) << std::endl;
+        }
+
+        currentValues = nextValues;
     }
 
     std::cout << "Finished after " << iter_count << " iterations" << std::endl;

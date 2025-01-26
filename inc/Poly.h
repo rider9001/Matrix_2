@@ -16,17 +16,20 @@
 
 #include "Complex.h"
 
-/// @brief Limit for differnce between two iterations where
-/// convergence will be considered to be reached
-#define CONVERGENCE_ITER_LIMIT 1.0E-10
+/// @brief Closest two conjugates can be to another in the initial values list
+#define CONJUGATE_PROX_LIM 1.0E-6
+
+/// @brief Smallest number to allow in the starting values for either real or imaginary compontent
+#define SMALLEST_ALLOWED_START_VAL 1.0E-9
 
 enum MAX_FACTOR_ITER
 {
-    MAX_ITER_LOW = 256,     // 2^8
-    MAX_ITER_MID = 8192,    // 2^13
-    MAX_ITER_HIGH = 262144  // 2^18
+    MAX_ITER_VLOW = 64,      // 2^6
+    MAX_ITER_LOW = 256,      // 2^8
+    MAX_ITER_MID = 8192,     // 2^13
+    MAX_ITER_HIGH = 262144,  // 2^18
+    MAX_ITER_VHIGH = 4194304 // 2^22
 };
-
 
 /// ------------------------------------------
 /// @brief Cast to ostream for printing polynomial
@@ -38,7 +41,7 @@ enum MAX_FACTOR_ITER
 std::ostream& operator<<(std::ostream& os, const std::vector<Complex_C_t>& poly);
 
 /// ------------------------------------------
-/// @brief Cast to ostream for priting factors
+/// @brief Cast to ostream for printing factors
 ///
 /// @param os output stream
 /// @param factors factors to print
@@ -75,8 +78,7 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
 /// Uses Durand-Kerner method: https://youtu.be/5JcpOj2KtWc
 ///
 /// @param compressedPoly complex polynomial
-/// @param max_itr_flag flag for max iterations that will be run,
-/// if convergence is detected then function will halt and return
+/// @param max_itr_flag flag for number of iterations that will be run
 ///
 /// @return factor list
-std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t> compressedPoly, MAX_FACTOR_ITER max_itr_flag);
+std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t>& compressedPoly, MAX_FACTOR_ITER max_itr_flag);
