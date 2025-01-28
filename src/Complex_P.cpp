@@ -210,19 +210,6 @@ std::ostream& operator<<(std::ostream& os, const Complex_P_t& com)
 }
 
 ///--------------------------------------------------------
-void Complex_P_t::setArg(const double& arg)
-{
-    m_arg = fmod(arg, M_PI * 2);
-
-    // if m_arg above pi, need to shift [0, 2pi] or [-2pi, 0] range to [-pi, pi]
-    // being above pi means when translating the negative of the modulus is used
-    if (fabs(m_arg) > M_PI)
-    {
-        m_arg = -fmod(m_arg, M_PI);
-    }
-};
-
-///--------------------------------------------------------
 double Complex_P_t::real() const
 {
     return m_mag * cos(m_arg);

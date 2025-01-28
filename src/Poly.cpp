@@ -128,7 +128,10 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
     Complex_C_t sum_factors = 0;
     for (size_t i = 0; i < compressedPoly.size(); i++)
     {
-        sum_factors += compressedPoly.at(i) * powComplex(x, i);
+        if (compressedPoly.at(i) != 0.0)
+        {
+            sum_factors += compressedPoly.at(i) * powComplex(x, i);
+        }
     }
 
     //std::cout << compressedPoly << ", f(" << x << ") = " << sum_factors << std::endl;
@@ -148,17 +151,16 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     }
 
     // Create a distribution circle for initial values
-    const double radius = pow( (compressedPoly.at(0).absolute() / compressedPoly.at(maxRank).absolute()), (1.0 / maxRank) );
-    const double start_angle = (2 * M_PI) / maxRank;
-    const double offset = M_PI / 2 * maxRank;
+    const double radius = pow( compressedPoly.at(0).absolute() / compressedPoly.at(maxRank).absolute(), (1.0 / maxRank) );
+    const double base_angle = (2 * M_PI) / maxRank;
+    const double offset = M_PI / (2 * maxRank);
 
-    std::cout << "Radius: " << radius << ", start angle: " << start_angle << std::endl;
+    std::cout << "Radius: " << radius << ", base angle: " << base_angle << ", offset: " << offset << std::endl;
 
     std::vector<Complex_C_t> nextValues(maxRank);
     for (size_t i = 0; i < nextValues.size(); i++)
     {
-        nextValues.at(i) = polarToCart({radius, (i * start_angle) + offset});
-        nextValues.at(i) *= -1;
+        nextValues.at(i) = polarToCart({radius, (i * base_angle) + offset});
 
         // Fixes an issue with very small values breaking some math functions
         if (fabs(nextValues.at(i).m_real) < SMALLEST_ALLOWED_START_VAL)
@@ -173,21 +175,26 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     }
 
     // Prevent conjugate pairs and values on the real line
-    for (size_t i = 0; i < nextValues.size(); i++)
-    {
-        if (nextValues.at(i).m_real == 0)
-        {
-            nextValues.at(i).m_imagine += 0.01;
-        }
+    // for (size_t i = 0; i < nextValues.size(); i++)
+    // {
+    //     if (nextValues.at(i).m_imagine == 0)
+    //     {
+    //         nextValues.at(i).m_imagine += OFFSET_VAL;
+    //     }
 
-        for (size_t j = 0; j < nextValues.size(); j++)
-        {
-            if(j != i && abs(nextValues.at(i).conjugate().m_imagine - nextValues.at(j).m_imagine) < CONJUGATE_PROX_LIM)
-            {
-                nextValues.at(j).m_imagine += 0.01;
-            }
-        }
-    }
+    //     for (size_t j = 0; j < nextValues.size(); j++)
+    //     {
+    //         // for any starting value where the conjugate is too close to another starting point
+    //         // adjust the imaginary component slightly
+    //         if(j != i &&
+    //            fabs(nextValues.at(i).conjugate().m_imagine - nextValues.at(j).m_imagine) < CONJUGATE_PROX_LIM &&
+    //            nextValues.at(i).m_real == nextValues.at(j).m_real
+    //           )
+    //         {
+    //             nextValues.at(j).m_imagine += OFFSET_VAL;
+    //         }
+    //     }
+    // }
 
     std::cout << "Starting values: ";
     for (auto val : nextValues)

@@ -20,7 +20,10 @@
 #define CONJUGATE_PROX_LIM 1.0E-6
 
 /// @brief Smallest number to allow in the starting values for either real or imaginary compontent
-#define SMALLEST_ALLOWED_START_VAL 1.0E-9
+#define SMALLEST_ALLOWED_START_VAL 1.0E-12
+
+/// @brief Value to offset any starting values placed on the real line or conjugates
+#define OFFSET_VAL 1.0E-6
 
 enum MAX_FACTOR_ITER
 {

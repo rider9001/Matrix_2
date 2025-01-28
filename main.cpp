@@ -28,7 +28,7 @@ int main()
 
     std::vector<Complex_C_t> test_poly = {-1,0,1};
 
-    cout << test_poly << endl;
+    cout << "Finding roots of: " << test_poly << endl;
 
     auto factors = FactorizePoly(test_poly, MAX_ITER_VLOW);
 

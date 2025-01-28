@@ -19,7 +19,7 @@ struct Complex_P_t
     /// @brief magnitude of polar complex
     double m_mag = 0;
 
-    /// @brief argument/angle of polar complex, radians, should only ever be in the range [0, 2pi]
+    /// @brief argument/angle of polar complex, radians
     double m_arg = 0;
 
     /// @brief Default constructor
@@ -37,7 +37,7 @@ struct Complex_P_t
     Complex_P_t(const double& mag, const double& arg)
     {
         m_mag = mag;
-        setArg(arg);
+        m_arg = arg;
     };
 
     ///--------------------------------------------------------
@@ -49,13 +49,6 @@ struct Complex_P_t
         m_mag = mag;
         m_arg = 0;
     };
-
-    ///--------------------------------------------------------
-    /// @brief Setter function for the argument that bounds argument
-    /// to [-pi, pi]
-    ///
-    /// @param arg to set m_arg to
-    void setArg(const double& arg);
 
     ///--------------------------------------------------------
     /// @brief gets the real component of the polar complex
