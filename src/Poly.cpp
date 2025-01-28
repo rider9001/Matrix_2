@@ -223,7 +223,7 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
 
             nextValues.at(i) = curVal - (getValCompressedPoly(curVal, compressedPoly) / sub_product);
 
-            //std::cout << "(" << curVal << ") - (" << getValCompressedPoly(curVal, compressedPoly) << " / " <<  sub_product << ") = " << nextValues.at(i) << std::endl;
+            std::cout << "(" << curVal << ") - (" << getValCompressedPoly(curVal, compressedPoly) << " / " <<  sub_product << ") = " << nextValues.at(i) << std::endl;
         }
 
         iter_count++;

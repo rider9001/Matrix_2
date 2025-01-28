@@ -219,27 +219,7 @@ double Complex_C_t::absolute() const
 ///--------------------------------------------------------
 double Complex_C_t::argument() const
 {
-    // Implemenation of atan that allows for +/- inf inputs
-    // and scales output to [-pi, pi] range, relative to eastward 0 deg
-    if (m_real == 0 and m_imagine == 0)
-    {
-        return 0;
-    }
-
-    double preRotation = 0;
-    if (m_real < 0)
-    {
-        if (m_imagine > 0)
-        {
-            preRotation = M_PI_2;
-        }
-        else
-        {
-            preRotation = -M_PI_2;
-        }
-    }
-
-    return atan(m_imagine / m_real) + preRotation;
+    return atan(m_imagine / m_real);
 }
 
 ///--------------------------------------------------------
