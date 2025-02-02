@@ -60,12 +60,10 @@ struct Complex_C_t
     double absolute() const;
 
     ///--------------------------------------------------------
-    /// @brief Find the argument of the input com
+    /// @brief Find the argument of the complex number
+    /// Implements atan2 from https://en.wikipedia.org/wiki/Argument_(complex_analysis)
     ///
     /// @return argument in radians, [-pi, pi] range
-    /// clockwise relative to 1+0i
-    ///
-    /// @note returns 0 if com = 0+0i
     double argument() const;
 };
 
@@ -136,6 +134,14 @@ Complex_C_t operator-(const Complex_C_t& lcom, const double& rreal);
 ///
 /// @return resulting complex number
 Complex_C_t operator-(const double& lreal, const Complex_C_t& rcom);
+
+///--------------------------------------------------------
+/// @brief Overload of uniary -, inverts a complex number
+///
+/// @param com
+///
+/// @return resulting complex number
+Complex_C_t operator-(const Complex_C_t& com);
 
 ///--------------------------------------------------------
 /// @brief Overload of -=, subtracts rcom from lcom
@@ -303,6 +309,15 @@ std::ostream& operator<<(std::ostream& os, const Complex_C_t& com);
 ///
 /// @return complex result of e^com
 Complex_C_t raiseEComplex(const Complex_C_t& com);
+
+///--------------------------------------------------------
+/// @brief Raises a complex number by a real power
+///
+/// @param base complex number to raise
+/// @param raise power to raise it by
+///
+/// @return raised complex number
+Complex_C_t powReal(const Complex_C_t& base, const double& raise);
 
 ///--------------------------------------------------------
 /// @brief Raises a complex number by another complex number

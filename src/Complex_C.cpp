@@ -56,6 +56,12 @@ Complex_C_t operator-(const double& lreal, const Complex_C_t& rcom)
 }
 
 ///--------------------------------------------------------
+Complex_C_t operator-(const Complex_C_t& com)
+{
+    return Complex_C_t{-com.m_real, -com.m_imagine};
+}
+
+///--------------------------------------------------------
 void operator-=(Complex_C_t& lcom, const Complex_C_t& rcom)
 {
     lcom = lcom - rcom;
@@ -219,7 +225,30 @@ double Complex_C_t::absolute() const
 ///--------------------------------------------------------
 double Complex_C_t::argument() const
 {
-    return atan(m_imagine / m_real);
+    if (m_real > 0)
+    {
+        return atan(m_imagine / m_real);
+    }
+    else if (m_real < 0 && m_imagine >= 0)
+    {
+        return atan(m_imagine / m_real) + M_PI;
+    }
+    else if (m_real < 0 && m_imagine < 0)
+    {
+        return atan(m_imagine / m_real) - M_PI;
+    }
+    else if (m_real == 0 && m_imagine > 0)
+    {
+        return M_PI_2;
+    }
+    else if (m_real == 0 && m_imagine < 0)
+    {
+        return -M_PI_2;
+    }
+    else
+    {
+        return NAN;
+    }
 }
 
 ///--------------------------------------------------------
@@ -233,6 +262,19 @@ Complex_C_t raiseEComplex(const Complex_C_t& com)
         eb * cos(com.m_imagine),
         eb * sin(com.m_imagine)
     };
+}
+
+///--------------------------------------------------------
+Complex_C_t powReal(const Complex_C_t& base, const double& raise)
+{
+    // (a+ib)^N = (r^N)*(cos(Nθ) + i*sin(Nθ))
+    const double abs_powered = pow(base.absolute(), raise);
+    const double ang_mulled = base.argument() * raise;
+
+    return Complex_C_t{
+                        abs_powered * cos(ang_mulled),
+                        abs_powered * sin(ang_mulled)
+                      };
 }
 
 ///--------------------------------------------------------

@@ -70,6 +70,12 @@ Complex_P_t operator-(const double& lreal, const Complex_P_t& rcom)
 }
 
 ///--------------------------------------------------------
+Complex_P_t operator-(const Complex_P_t& com)
+{
+    return {-com.m_mag, com.m_arg};
+}
+
+///--------------------------------------------------------
 void operator-=(Complex_P_t& lcom, const Complex_P_t& rcom)
 {
     Complex_C_t cartL{lcom.real(), lcom.imaginary()};
@@ -219,4 +225,14 @@ double Complex_P_t::real() const
 double Complex_P_t::imaginary() const
 {
     return m_mag * sin(m_arg);
+}
+
+///--------------------------------------------------------
+Complex_P_t powReal(const Complex_P_t& base, const double& raise)
+{
+    return Complex_P_t
+                    {
+                        pow(base.m_mag, raise),
+                        base.m_arg * raise
+                    };
 }

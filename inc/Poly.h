@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <iostream>
 #include <exception>
+#include <algorithm>
 
 #include "Complex.h"
 

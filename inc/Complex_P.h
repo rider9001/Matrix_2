@@ -132,6 +132,14 @@ Complex_P_t operator-(const Complex_P_t& lcom, const double& rreal);
 Complex_P_t operator-(const double& lreal, const Complex_P_t& rcom);
 
 ///--------------------------------------------------------
+/// @brief Overload of uniary -, inverts a complex number
+///
+/// @param com
+///
+/// @return resulting complex number
+Complex_P_t operator-(const Complex_P_t& com);
+
+///--------------------------------------------------------
 /// @brief Overload of -=, subtracts rcom from lcom
 ///
 /// @param lcom left hand complex
@@ -289,3 +297,12 @@ bool operator!=(const double& lreal, const Complex_P_t& rcom);
 ///
 /// @return output stream
 std::ostream& operator<<(std::ostream& os, const Complex_P_t& com);
+
+///--------------------------------------------------------
+/// @brief Raises a complex number by a real power
+///
+/// @param base complex number to raise
+/// @param raise power to raise it by
+///
+/// @return raised complex number
+Complex_P_t powReal(const Complex_P_t& base, const double& raise);

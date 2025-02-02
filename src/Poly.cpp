@@ -130,11 +130,11 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
     {
         if (compressedPoly.at(i) != 0.0)
         {
-            sum_factors += compressedPoly.at(i) * powComplex(x, i);
+            sum_factors += compressedPoly.at(i) * powReal(x, i);
         }
     }
 
-    //std::cout << compressedPoly << ", f(" << x << ") = " << sum_factors << std::endl;
+    //std::cout << "f(x) = " << compressedPoly << ", f(" << x << ") = " << sum_factors << std::endl;
 
     return sum_factors;
 }
@@ -150,12 +150,22 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
                                     "might implement rank 1 at some point.");
     }
 
+    Complex_C_t first_nonzero_coeff;
+    for (auto coeff : compressedPoly)
+    {
+        if (coeff != 0)
+        {
+            first_nonzero_coeff = coeff;
+            break;
+        }
+    }
+
     // Create a distribution circle for initial values
-    const double radius = pow( compressedPoly.at(0).absolute() / compressedPoly.at(maxRank).absolute(), (1.0 / maxRank) );
+    const double radius = pow( first_nonzero_coeff.absolute() / compressedPoly.at(maxRank).absolute(), (1.0 / maxRank) );
     const double base_angle = (2 * M_PI) / maxRank;
     const double offset = M_PI / (2 * maxRank);
 
-    std::cout << "Radius: " << radius << ", base angle: " << base_angle << ", offset: " << offset << std::endl;
+    //std::cout << "Radius: " << radius << ", base angle: " << base_angle << ", offset: " << offset << std::endl;
 
     std::vector<Complex_C_t> nextValues(maxRank);
     for (size_t i = 0; i < nextValues.size(); i++)
@@ -174,45 +184,30 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
         }
     }
 
-    // Prevent conjugate pairs and values on the real line
-    // for (size_t i = 0; i < nextValues.size(); i++)
+    // std::cout << "Starting values: ";
+    // for (auto val : nextValues)
     // {
-    //     if (nextValues.at(i).m_imagine == 0)
-    //     {
-    //         nextValues.at(i).m_imagine += OFFSET_VAL;
-    //     }
-
-    //     for (size_t j = 0; j < nextValues.size(); j++)
-    //     {
-    //         // for any starting value where the conjugate is too close to another starting point
-    //         // adjust the imaginary component slightly
-    //         if(j != i &&
-    //            fabs(nextValues.at(i).conjugate().m_imagine - nextValues.at(j).m_imagine) < CONJUGATE_PROX_LIM &&
-    //            nextValues.at(i).m_real == nextValues.at(j).m_real
-    //           )
-    //         {
-    //             nextValues.at(j).m_imagine += OFFSET_VAL;
-    //         }
-    //     }
+    //     std::cout << val << " , ";
     // }
-
-    std::cout << "Starting values: ";
-    for (auto val : nextValues)
-    {
-        std::cout << val << " , ";
-    }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
     std::vector<Complex_C_t> currentValues = nextValues;
     size_t iter_count = 0;
 
     while (iter_count < max_itr_flag)
     {
+        // std::cout << "-------------------------------------" << std::endl;
+        // std::cout << "Iteration " << iter_count + 1 << " start, values:" << std::endl;
+        // for (size_t j = 0; j < nextValues.size(); j++)
+        // {
+        //     std::cout << "Root " << (j+1) << ": " << nextValues.at(j) << std::endl;
+        // }
+
         for (size_t i = 0; i < currentValues.size(); i++)
         {
             Complex_C_t curVal = currentValues.at(i);
 
-            Complex_C_t sub_product = 1;
+            Complex_C_t sub_product = 1.0;
             for (size_t j = 0; j < currentValues.size(); j++)
             {
                 if (j != i)
@@ -223,26 +218,26 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
 
             nextValues.at(i) = curVal - (getValCompressedPoly(curVal, compressedPoly) / sub_product);
 
-            std::cout << "(" << curVal << ") - (" << getValCompressedPoly(curVal, compressedPoly) << " / " <<  sub_product << ") = " << nextValues.at(i) << std::endl;
+            //std::cout << "(" << curVal << ") - (" << getValCompressedPoly(curVal, compressedPoly) << " / " <<  sub_product << ") = " << nextValues.at(i) << std::endl;
         }
 
         iter_count++;
 
-        std::cout << "iteration " << iter_count << " done, values:" << std::endl;
-        for (size_t j = 0; j < nextValues.size(); j++)
-        {
-            std::cout << "Root " << (j+1) << ": " << nextValues.at(j) << std::endl;
-        }
+        // std::cout << "iteration done, values:" << std::endl;
+        // for (size_t j = 0; j < nextValues.size(); j++)
+        // {
+        //     std::cout << "Root " << (j+1) << ": " << nextValues.at(j) << std::endl;
+        // }
 
         currentValues = nextValues;
     }
 
-    std::cout << "Finished after " << iter_count << " iterations" << std::endl;
+    //std::cout << "Finished after " << iter_count << " iterations" << std::endl;
 
     std::vector< std::pair<double, Complex_C_t> > factors(maxRank);
     for(size_t i = 0; i < maxRank; i++)
     {
-        factors.at(i) = {1, nextValues.at(i)};
+        factors.at(i) = {1, -nextValues.at(i)};
     }
 
     return factors;
