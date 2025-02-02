@@ -17,23 +17,14 @@
 
 #include "Complex.h"
 
-/// @brief Closest two conjugates can be to another in the initial values list
-#define CONJUGATE_PROX_LIM 1.0E-6
-
 /// @brief Smallest number to allow in the starting values for either real or imaginary compontent
 #define SMALLEST_ALLOWED_START_VAL 1.0E-12
 
-/// @brief Value to offset any starting values placed on the real line or conjugates
-#define OFFSET_VAL 1.0E-6
+/// @brief maximum number of durand-kerner iterations that may be performed
+#define MAX_DK_ITERATIONS 256
 
-enum MAX_FACTOR_ITER
-{
-    MAX_ITER_VLOW = 64,      // 2^6
-    MAX_ITER_LOW = 256,      // 2^8
-    MAX_ITER_MID = 8192,     // 2^13
-    MAX_ITER_HIGH = 262144,  // 2^18
-    MAX_ITER_VHIGH = 4194304 // 2^22
-};
+/// @brief minimum value that must be exceeded by at least 1 root between durand-kerner iterations to continue
+#define MIN_DIFF_CONV_TEST 1.0E-9
 
 /// ------------------------------------------
 /// @brief Cast to ostream for printing polynomial
@@ -82,7 +73,6 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
 /// Uses Durand-Kerner method: https://youtu.be/5JcpOj2KtWc
 ///
 /// @param compressedPoly complex polynomial
-/// @param max_itr_flag flag for number of iterations that will be run
 ///
 /// @return factor list
-std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t>& compressedPoly, MAX_FACTOR_ITER max_itr_flag);
+std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t>& compressedPoly);

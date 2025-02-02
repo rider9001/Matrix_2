@@ -134,13 +134,11 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
         }
     }
 
-    //std::cout << "f(x) = " << compressedPoly << ", f(" << x << ") = " << sum_factors << std::endl;
-
     return sum_factors;
 }
 
 /// ------------------------------------------
-std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t>& compressedPoly, MAX_FACTOR_ITER max_itr_flag)
+std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t>& compressedPoly)
 {
     size_t maxRank = compressedPoly.size() - 1;
 
@@ -165,8 +163,6 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     const double base_angle = (2 * M_PI) / maxRank;
     const double offset = M_PI / (2 * maxRank);
 
-    //std::cout << "Radius: " << radius << ", base angle: " << base_angle << ", offset: " << offset << std::endl;
-
     std::vector<Complex_C_t> nextValues(maxRank);
     for (size_t i = 0; i < nextValues.size(); i++)
     {
@@ -184,25 +180,12 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
         }
     }
 
-    // std::cout << "Starting values: ";
-    // for (auto val : nextValues)
-    // {
-    //     std::cout << val << " , ";
-    // }
-    // std::cout << std::endl;
-
     std::vector<Complex_C_t> currentValues = nextValues;
     size_t iter_count = 0;
+    bool all_converged = false;
 
-    while (iter_count < max_itr_flag)
+    while (iter_count < MAX_DK_ITERATIONS && !all_converged)
     {
-        // std::cout << "-------------------------------------" << std::endl;
-        // std::cout << "Iteration " << iter_count + 1 << " start, values:" << std::endl;
-        // for (size_t j = 0; j < nextValues.size(); j++)
-        // {
-        //     std::cout << "Root " << (j+1) << ": " << nextValues.at(j) << std::endl;
-        // }
-
         for (size_t i = 0; i < currentValues.size(); i++)
         {
             Complex_C_t curVal = currentValues.at(i);
@@ -217,22 +200,24 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
             }
 
             nextValues.at(i) = curVal - (getValCompressedPoly(curVal, compressedPoly) / sub_product);
+        }
 
-            //std::cout << "(" << curVal << ") - (" << getValCompressedPoly(curVal, compressedPoly) << " / " <<  sub_product << ") = " << nextValues.at(i) << std::endl;
+        for (size_t i = 0; i < currentValues.size(); i++)
+        {
+            if (std::abs( currentValues.at(i).absolute() - nextValues.at(i).absolute() ) < MIN_DIFF_CONV_TEST)
+            {
+                all_converged = true;
+            }
+            else
+            {
+                all_converged = false;
+                break;
+            }
         }
 
         iter_count++;
-
-        // std::cout << "iteration done, values:" << std::endl;
-        // for (size_t j = 0; j < nextValues.size(); j++)
-        // {
-        //     std::cout << "Root " << (j+1) << ": " << nextValues.at(j) << std::endl;
-        // }
-
         currentValues = nextValues;
     }
-
-    //std::cout << "Finished after " << iter_count << " iterations" << std::endl;
 
     std::vector< std::pair<double, Complex_C_t> > factors(maxRank);
     for(size_t i = 0; i < maxRank; i++)
