@@ -26,7 +26,7 @@ int main()
     // Complex_P_t res = degTest / test2;
     // cout << res << ", " << polarToCart(res) << endl;
 
-    std::vector<Complex_C_t> test_poly = {-16,0,0,0,15,0,0,0,2};
+    std::vector<Complex_C_t> test_poly = {0,-16,0,0,0,4};
 
     cout << "Finding roots of: " << test_poly << endl;
 

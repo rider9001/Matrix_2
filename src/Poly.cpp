@@ -163,6 +163,8 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     const double base_angle = (2 * M_PI) / maxRank;
     const double offset = M_PI / (2 * maxRank);
 
+    // std::cout << "radius: " << radius << ", base angle: " << base_angle << ", offset: " << offset << std::endl;
+
     std::vector<Complex_C_t> nextValues(maxRank);
     for (size_t i = 0; i < nextValues.size(); i++)
     {
@@ -180,12 +182,20 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
         }
     }
 
+    // std::cout << "starting values: " << std::endl;
+    // for(size_t i = 0; i < nextValues.size(); i++)
+    // {
+    //     std::cout << i+1 << ": " << nextValues.at(i) << std::endl;
+    // }
+
     std::vector<Complex_C_t> currentValues = nextValues;
-    size_t iter_count = 1;
+    size_t iter_count = 0;
     bool all_converged = false;
 
     while (iter_count < MAX_DK_ITERATIONS && !all_converged)
     {
+        iter_count++;
+
         for (size_t i = 0; i < currentValues.size(); i++)
         {
             Complex_C_t curVal = currentValues.at(i);
@@ -216,11 +226,10 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
             }
         }
 
-        iter_count++;
         currentValues = nextValues;
     }
 
-    //std::cout << "Completed in " << iter_count << " iterations" << std::endl;
+    std::cout << "Completed in " << iter_count << " iterations" << std::endl;
 
     std::vector< std::pair<double, Complex_C_t> > factors(maxRank);
     for(size_t i = 0; i < maxRank; i++)

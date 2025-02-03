@@ -71,6 +71,8 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
 /// @brief Factorize the given complex polynomial into all roots
 /// Will not filter non-unique roots
 ///
+/// WARN: Works for 99% of all polynomials, but is not garenteed to converge
+///
 /// Uses Durand-Kerner method: https://youtu.be/5JcpOj2KtWc
 ///
 /// @param compressedPoly complex polynomial
