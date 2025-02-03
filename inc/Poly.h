@@ -14,6 +14,7 @@
 #include <iostream>
 #include <exception>
 #include <algorithm>
+#include <limits>
 
 #include "Complex.h"
 
@@ -21,9 +22,9 @@
 #define SMALLEST_ALLOWED_START_VAL 1.0E-12
 
 /// @brief maximum number of durand-kerner iterations that may be performed
-#define MAX_DK_ITERATIONS 256
+#define MAX_DK_ITERATIONS 1048576 // 2^20
 
-/// @brief minimum value that must be exceeded by at least 1 root between durand-kerner iterations to continue
+/// @brief minimum differnce that must be exceeded by at least 1 root between durand-kerner iterations to continue
 #define MIN_DIFF_CONV_TEST 1.0E-9
 
 /// ------------------------------------------

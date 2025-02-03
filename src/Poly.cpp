@@ -43,11 +43,11 @@ std::ostream& operator<<(std::ostream& os, const std::vector< std::pair<double, 
 
         if (factor.first == 1)
         {
-            os << "x ";
+            os << "x";
         }
         else
         {
-            os << factor.first << "x ";
+            os << factor.first << "x";
         }
 
         os << factor.second << ")";
@@ -181,7 +181,7 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     }
 
     std::vector<Complex_C_t> currentValues = nextValues;
-    size_t iter_count = 0;
+    size_t iter_count = 1;
     bool all_converged = false;
 
     while (iter_count < MAX_DK_ITERATIONS && !all_converged)
@@ -210,6 +210,7 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
             }
             else
             {
+                // if any roots fail this test, continue iterations
                 all_converged = false;
                 break;
             }
@@ -218,6 +219,8 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
         iter_count++;
         currentValues = nextValues;
     }
+
+    //std::cout << "Completed in " << iter_count << " iterations" << std::endl;
 
     std::vector< std::pair<double, Complex_C_t> > factors(maxRank);
     for(size_t i = 0; i < maxRank; i++)
