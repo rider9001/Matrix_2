@@ -7,7 +7,83 @@
 #include "../inc/Poly.h"
 
 /// ------------------------------------------
-std::ostream& operator<<(std::ostream& os, const std::vector<Complex_C_t>& poly)
+Poly_Coeff_t operator+(const Poly_Coeff_t& coeffL, const Poly_Coeff_t& coeffR)
+{
+    size_t highestRank = std::max(coeffL.size(), coeffR.size());
+    size_t shorterRank = std::min(coeffL.size(), coeffR.size());
+    bool LHigherRank = coeffL.size() > coeffR.size();
+
+    Poly_Coeff_t outCoeff(highestRank);
+    for (size_t i = 0; i < highestRank; i++)
+    {
+        if (i < shorterRank)
+        {
+            outCoeff.at(i) = coeffL.at(i) + coeffR.at(i);
+        }
+        else
+        {
+            if (LHigherRank)
+            {
+                outCoeff.at(i) = coeffL.at(i);
+            }
+            else
+            {
+                 outCoeff.at(i) = coeffR.at(i);
+            }
+        }
+    }
+
+    return outCoeff;
+}
+
+/// ------------------------------------------
+Poly_Coeff_t operator-(const Poly_Coeff_t& coeffL, const Poly_Coeff_t& coeffR)
+{
+    size_t highestRank = std::max(coeffL.size(), coeffR.size());
+    size_t shorterRank = std::min(coeffL.size(), coeffR.size());
+    bool LHigherRank = coeffL.size() > coeffR.size();
+
+    Poly_Coeff_t outCoeff(highestRank);
+    for (size_t i = 0; i < highestRank; i++)
+    {
+        if (i < shorterRank)
+        {
+            outCoeff.at(i) = coeffL.at(i) - coeffR.at(i);
+        }
+        else
+        {
+            if (LHigherRank)
+            {
+                outCoeff.at(i) = coeffL.at(i);
+            }
+            else
+            {
+                 outCoeff.at(i) = -coeffR.at(i);
+            }
+        }
+    }
+
+    return outCoeff;
+}
+
+/// ------------------------------------------
+Poly_Coeff_t operator*(const Poly_Coeff_t& coeffL, const Poly_Coeff_t& coeffR)
+{
+    Poly_Coeff_t outCoeff(coeffL.size() + coeffR.size() - 1, 0);
+
+    for (size_t i = 0; i < coeffL.size(); i++)
+    {
+        for (size_t j = 0; j < coeffR.size(); j++)
+        {
+            outCoeff.at(i+j) += coeffL.at(i) * coeffR.at(j);
+        }
+    }
+
+    return outCoeff;
+}
+
+/// ------------------------------------------
+std::ostream& operator<<(std::ostream& os, const Poly_Coeff_t& poly)
 {
     for (size_t power = 0; power < poly.size(); power++)
     {
@@ -35,7 +111,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Complex_C_t>& poly)
 }
 
 /// ------------------------------------------
-std::ostream& operator<<(std::ostream& os, const std::vector< std::pair<double, Complex_C_t> >& factors)
+std::ostream& operator<<(std::ostream& os, const Poly_factors_t& factors)
 {
     for (auto factor : factors)
     {
@@ -57,10 +133,10 @@ std::ostream& operator<<(std::ostream& os, const std::vector< std::pair<double, 
 }
 
 /// ------------------------------------------
-std::vector<Complex_C_t> CompressFactors(const std::vector< std::pair<double, Complex_C_t> >& factorList)
+Poly_Coeff_t CompressFactors(const Poly_factors_t& factorList)
 {
     // Highest polynomial rank is equal to the number of factors
-    std::vector<Complex_C_t> compressedPoly(factorList.size() + 1);
+    Poly_Coeff_t compressedPoly(factorList.size() + 1);
 
     for (size_t curPower = 0; curPower < compressedPoly.size(); curPower++)
     {
@@ -123,7 +199,7 @@ std::vector<Complex_C_t> CompressFactors(const std::vector< std::pair<double, Co
 }
 
 /// ------------------------------------------
-Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_C_t>& compressedPoly)
+Complex_C_t getValCompressedPoly(const Complex_C_t x, const Poly_Coeff_t& compressedPoly)
 {
     Complex_C_t sum_factors = 0;
     for (size_t i = 0; i < compressedPoly.size(); i++)
@@ -138,7 +214,7 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const std::vector<Complex_
 }
 
 /// ------------------------------------------
-std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Complex_C_t>& compressedPoly)
+Poly_factors_t FactorizePoly(const Poly_Coeff_t& compressedPoly)
 {
     size_t maxRank = compressedPoly.size() - 1;
 
@@ -165,7 +241,7 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
 
     // std::cout << "radius: " << radius << ", base angle: " << base_angle << ", offset: " << offset << std::endl;
 
-    std::vector<Complex_C_t> nextValues(maxRank);
+    Poly_Coeff_t nextValues(maxRank);
     for (size_t i = 0; i < nextValues.size(); i++)
     {
         nextValues.at(i) = polarToCart({radius, (i * base_angle) + offset});
@@ -188,7 +264,7 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
     //     std::cout << i+1 << ": " << nextValues.at(i) << std::endl;
     // }
 
-    std::vector<Complex_C_t> currentValues = nextValues;
+    Poly_Coeff_t currentValues = nextValues;
     size_t iter_count = 0;
     bool all_converged = false;
 
@@ -229,7 +305,7 @@ std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const std::vector<Co
         currentValues = nextValues;
     }
 
-    std::cout << "Completed in " << iter_count << " iterations" << std::endl;
+    //std::cout << "Completed in " << iter_count << " iterations" << std::endl;
 
     std::vector< std::pair<double, Complex_C_t> > factors(maxRank);
     for(size_t i = 0; i < maxRank; i++)

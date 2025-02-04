@@ -13,6 +13,9 @@
 #include <cstring>
 #include <cmath>
 
+// Included for the quadratic solver to calculate eigenvalues/vectors
+#include "Poly.h"
+
 /// @brief Templated class for storing, acsessing and performing operations on a matrix of values
 template <typename T>
 class Matrix
@@ -24,7 +27,7 @@ class Matrix
         /// @note Memory will only be allocated with no construction taking place
         ///
         /// @tparam T type to store in the matrix, type must be copy
-        /// constructable and have all maths operations (+-*/) implemented
+        /// constructable and have all maths operations (+,-,*,/) implemented
         /// with at least itself for any calculations to be performed
         ///
         /// @param rows number of rows to allocate
@@ -33,7 +36,7 @@ class Matrix
         /// @throws std::invalid_argument if rows/cols < 1
         Matrix(const size_t& rows, const size_t& cols)
         {
-            if (rows < 1 or cols < 1)
+            if (rows < 1 || cols < 1)
             {
                 throw std::invalid_argument("Cols/Rows of a matrix must be above 0");
             }
@@ -44,8 +47,9 @@ class Matrix
             m_data = new T[m_cols * m_rows];
         };
 
-        /// @brief Constructor using
-        /// @param matData array of arrays to pipe into matrix
+        ///--------------------------------------------------------
+        /// @brief Constructor using an initializer list to populate matrix
+        /// @param matData array of arrays to populate matrix with
         Matrix(const std::initializer_list<std::initializer_list<T>>& matData)
         {
             if (matData.size() == 0)
@@ -129,7 +133,7 @@ class Matrix
         /// @return result of summed matricies
         Matrix<T> operator+(Matrix<T> const& mat)
         {
-            if (mat.getColCount() != m_cols or mat.getRowCount() != m_rows)
+            if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
                 throw std::invalid_argument("Matrix addition requires matricies of same dimensions");
             }
@@ -153,7 +157,7 @@ class Matrix
         /// @return result of subtracted matricies
         Matrix<T> operator-(Matrix<T> const& mat)
         {
-            if (mat.getColCount() != m_cols or mat.getRowCount() != m_rows)
+            if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
                 throw std::invalid_argument("Matrix subtraction requires matricies of same dimensions");
             }
@@ -177,7 +181,7 @@ class Matrix
         /// @return result of dot product matricies
         Matrix<T> operator*(Matrix<T> const& mat)
         {
-            if (mat.getColCount() != m_cols or mat.getRowCount() != m_rows)
+            if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
                 throw std::invalid_argument("Dot product requires matricies of same dimensions");
             }
@@ -250,7 +254,7 @@ class Matrix
         /// @return are matricies equal in dimension and content?
         bool operator==(Matrix<T> const& mat)
         {
-            if (mat.getColCount() != m_cols or mat.getRowCount() != m_rows)
+            if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
                 return false;
             }
@@ -273,7 +277,7 @@ class Matrix
         ///
         /// @param mat rval mat to compare
         ///
-        /// @return are matricies not equal in dimension or content?
+        /// @return are matricies not equal in dimension || content?
         bool operator!=(Matrix<T> const& mat)
         {
             return !(*this == mat);
@@ -577,7 +581,7 @@ class Matrix
         ///--------------------------------------------------------
         /// @brief Finds the row containing the most zeros
         ///
-        /// @note if no zeros are found, row 1 (0) will be returned
+        /// @note if no zeros are found, row 1 (index 0) will be returned
         ///
         /// @returns index of row with most zeros
         size_t _find_zeros_row() const

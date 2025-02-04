@@ -26,13 +26,17 @@ int main()
     // Complex_P_t res = degTest / test2;
     // cout << res << ", " << polarToCart(res) << endl;
 
-    std::vector<Complex_C_t> test_poly = {0,-16,0,0,0,4};
+    Poly_Coeff_t test_poly = {-16,2,1};
 
-    cout << "Finding roots of: " << test_poly << endl;
+    Poly_Coeff_t test2 = {10,1,1};
 
-    auto factors = FactorizePoly(test_poly);
+    auto testout = test2 * test_poly;
 
-    cout << factors << endl;
+    cout << "(" << test2 << ") * (" << test_poly << ") = " << testout << endl;
+
+    // cout << "Finding roots of: " << test_poly << endl;
+    // auto factors = FactorizePoly(test_poly);
+    // cout << factors << endl;
 
     return 0;
 }
