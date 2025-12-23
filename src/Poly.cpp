@@ -111,7 +111,7 @@ std::ostream& operator<<(std::ostream& os, const Poly_Coeff_t& poly)
 }
 
 /// ------------------------------------------
-std::ostream& operator<<(std::ostream& os, const Poly_factors_t& factors)
+std::ostream& operator<<(std::ostream& os, const std::vector<Poly_factor_t>& factors)
 {
     for (auto factor : factors)
     {
@@ -133,7 +133,7 @@ std::ostream& operator<<(std::ostream& os, const Poly_factors_t& factors)
 }
 
 /// ------------------------------------------
-Poly_Coeff_t CompressFactors(const Poly_factors_t& factorList)
+Poly_Coeff_t CompressFactors(const std::vector<Poly_factor_t>& factorList)
 {
     // Highest polynomial rank is equal to the number of factors
     Poly_Coeff_t compressedPoly(factorList.size() + 1);
@@ -214,7 +214,7 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const Poly_Coeff_t& compre
 }
 
 /// ------------------------------------------
-Poly_factors_t FactorizePoly(const Poly_Coeff_t& compressedPoly)
+std::vector<Poly_factor_t> FactorizePoly(const Poly_Coeff_t& compressedPoly)
 {
     size_t maxRank = compressedPoly.size() - 1;
 

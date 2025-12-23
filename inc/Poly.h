@@ -30,8 +30,8 @@
 /// @brief Polynomial represented as the list of coefficents
 typedef std::vector<Complex_C_t> Poly_Coeff_t;
 
-/// @brief Polynomial represented as a list of factor pairs
-typedef std::vector<std::pair<double, Complex_C_t>> Poly_factors_t;
+/// @brief Polynomial factor, i.e: (2x-(4+3i)) -> <2, {4,3}>
+typedef std::pair<double, Complex_C_t> Poly_factor_t;
 
 /// ------------------------------------------
 /// @brief Operator implementation for adding two polynomial coefficent sets
@@ -76,7 +76,7 @@ std::ostream& operator<<(std::ostream& os, const Poly_Coeff_t& poly);
 /// @param factors factors to print
 ///
 /// @return output ostream
-std::ostream& operator<<(std::ostream& os, const Poly_factors_t& factors);
+std::ostream& operator<<(std::ostream& os, const std::vector<Poly_factor_t>& factors);
 
 /// ------------------------------------------
 /// @brief Compresses a list of factors into the minimal form
@@ -89,7 +89,7 @@ std::ostream& operator<<(std::ostream& os, const Poly_factors_t& factors);
 /// @param factorList list of factors stored as pairs, (2x-3) -> {2, -3}
 ///
 /// @return list of coefficents for the compressed polynomial
-Poly_Coeff_t CompressFactors(const Poly_factors_t& factorList);
+Poly_Coeff_t CompressFactors(const std::vector<Poly_factor_t>& factorList);
 
 /// ------------------------------------------
 /// @brief Using a compressed polynomial coefficent list, return the output for a value of x

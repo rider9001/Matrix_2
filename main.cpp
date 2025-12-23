@@ -15,28 +15,47 @@ using std::endl;
 
 int main()
 {
-    // auto mat = Matrix<Complex_C_t>({
-    //     {{1,1},{1,2}},
-    //     {{3,2},{2,1}}
-    // });
+    Matrix<double> test = {{1,2,3},{4,3,2},{9,1,1}};
 
-    // Complex_P_t degTest{2, M_PI};
-    // cout << degTest << ", " << polarToCart(degTest) << endl;
-    // Complex_P_t test2{6, M_PI / 2};
-    // Complex_P_t res = degTest / test2;
-    // cout << res << ", " << polarToCart(res) << endl;
+    auto row = test.getRow(1);
+    auto col = test.getCol(1);
 
-    Poly_Coeff_t test_poly = {-16,2,1};
+    cout << "Row: ";
+    for (auto num : row)
+    {
+        cout << num << ", ";
+    }
+    cout << endl;
 
-    Poly_Coeff_t test2 = {10,1,1};
+    cout << "Col: ";
+    for (auto num : col)
+    {
+        cout << num << ", ";
+    }
+    cout << endl;
 
-    auto testout = test2 * test_poly;
+    std::vector<double> vec = {2,1,3};
+    test.setRow(1, vec);
 
-    cout << "(" << test2 << ") * (" << test_poly << ") = " << testout << endl;
+    row = test.getRow(1);
+    cout << "Set row: ";
+    for (auto num : row)
+    {
+        cout << num << ", ";
+    }
+    cout << endl;
 
-    // cout << "Finding roots of: " << test_poly << endl;
-    // auto factors = FactorizePoly(test_poly);
-    // cout << factors << endl;
+    vec = {2,4,3};
+    test.setCol(1, vec);
+    col = test.getCol(1);
+    cout << "Col: ";
+    for (auto num : col)
+    {
+        cout << num << ", ";
+    }
+    cout << endl;
+
+    cout << test << endl;
 
     return 0;
 }

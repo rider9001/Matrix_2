@@ -315,6 +315,7 @@ class Matrix
             return m_data[_trans_coord(row, col)];
         };
 
+        ///--------------------------------------------------------
         /// @brief Sets the value at the row col position
         ///
         /// @param row to set value at
@@ -323,6 +324,42 @@ class Matrix
         void set(const size_t& row, const size_t& col, const T& val)
         {
             m_data[_trans_coord(row, col)] = val;
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Sets values for an entire row, rowData must have same length as matrix width
+        ///
+        /// @param row row to overwrite
+        /// @param rowData data for row write
+        void setRow(const size_t& row, const std::vector<T> rowData)
+        {
+            if (rowData.size() != m_cols)
+            {
+                throw std::invalid_argument("Row set vector length must be same as matrix width");
+            }
+
+            for(size_t i = 0; i < m_cols; i++)
+            {
+                set(row, i, rowData.at(i));
+            }
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Sets values for an entire column, colData must have same length as matrix hieght
+        ///
+        /// @param col column to overwrite
+        /// @param colData data for column write
+        void setCol(const size_t& col, const std::vector<T> colData)
+        {
+            if (colData.size() != m_rows)
+            {
+                throw std::invalid_argument("Column set vector length must be same as matrix hieght");
+            }
+
+            for(size_t i = 0; i < m_rows; i++)
+            {
+                set(i, col, colData.at(i));
+            }
         };
 
         ///--------------------------------------------------------
@@ -352,6 +389,68 @@ class Matrix
         size_t getColCount() const
         {
             return m_cols;
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Reads the requested row from the matrix and return left to right
+        ///
+        /// @param row row to read and return
+        ///
+        /// @return contents of row [row]
+        std::vector<T> getRow(const size_t& row) const
+        {
+            std::vector<T> outRow(m_cols);
+
+            for (size_t i = 0; i < m_cols; i++)
+            {
+                outRow.at(i) = get(row, i);
+            }
+
+            return outRow;
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Reads the requested column from the matrix and return top to bottom
+        ///
+        /// @param col column to read and return
+        ///
+        /// @return contents of column [col]
+        std::vector<T> getCol(const size_t& col) const
+        {
+            std::vector<T> outCol(m_rows);
+
+            for (size_t i = 0; i < m_rows; i++)
+            {
+                outCol.at(i) = get(i, col);
+            }
+
+            return outCol;
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Reads the requested row from the matrix and return left to right, returns in matrix
+        ///
+        /// @param row row to read and return
+        ///
+        /// @return contents of row [row], returned as matrix
+        Matrix<T> getRowMat(const size_t& row)
+        {
+            Matrix<T> outMat(1, m_cols);
+            outMat.setRow(0, getRow(row));
+            return outMat;
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Reads the requested column from the matrix and return top to bottom, returns in matrix
+        ///
+        /// @param row column to read and return
+        ///
+        /// @return contents of column [col], returned as matrix
+        Matrix<T> getColMat(const size_t& col)
+        {
+            Matrix<T> outMat(m_rows, 1);
+            outMat.setCol(0, getCol(col));
+            return outMat;
         };
 
         ///--------------------------------------------------------
@@ -506,6 +605,30 @@ class Matrix
         };
 
         ///--------------------------------------------------------
+        /// @brief Performs QR decomposition on the matrix
+        ///
+        /// @return Pair of <Q, R> matricies
+        /// Q will be under .first, R under .second
+        std::pair<Matrix<T>, Matrix<T>> qr_decompose()
+        {
+            // Setup Q matrix
+            Matrix<T> Q;
+            Q.setCol(0, getCol(0));
+
+            for (size_t i = 1; i < m_cols; i++)
+            {
+                Matrix<T> colMat(m_rows, 1);
+                colMat.setCol(getCol(i));
+
+                Matrix<T> projCol(m_rows, 1);
+                for (size_t j = 1; j < i+1; j++)
+                {
+
+                }
+            }
+        };
+
+        ///--------------------------------------------------------
         /// @brief Returns a matrix with each value of the input reciprocated
         ///
         /// @return reciprocated matrix
@@ -520,6 +643,35 @@ class Matrix
 
             return outMat;
         };
+
+        ///--------------------------------------------------------
+        /// @brief Creates a normalized version of all values in the matrix
+        ///
+        /// @return normalized matrix
+        Matrix<T> normalize()
+        {
+            T sum = 0;
+            for (size_t i = 0; i < m_rows * m_cols; i++)
+            {
+                sum += get_data()[i] * get_data()[i];
+            }
+
+            // Dynamically chooses which routine to implement depending on complex type
+            if constexpr (std::is_same_v<T, Complex_C_t>)
+            {
+                sum = powReal(sum, 0.5);
+            }
+            else if constexpr (std::is_same_v<T, Complex_P_t>)
+            {
+                sum = powReal(sum, 0.5);
+            }
+            else
+            {
+                sum = std::sqrt(sum);
+            }
+
+            return *this / sum;
+        }
 
         ///--------------------------------------------------------
         /// @brief Creates an identity matrix of size len
