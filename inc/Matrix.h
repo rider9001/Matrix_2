@@ -12,9 +12,11 @@
 #include <string>
 #include <cstring>
 #include <cmath>
+#include <vector>
 
-// Included for the quadratic solver to calculate eigenvalues/vectors
-#include "Poly.h"
+#include "Vector.h"
+#include "Complex_C.h"
+#include "Complex_P.h"
 
 /// @brief Templated class for storing, acsessing and performing operations on a matrix of values
 template <typename T>
@@ -49,7 +51,10 @@ class Matrix
 
         ///--------------------------------------------------------
         /// @brief Constructor using an initializer list to populate matrix
+        ///
         /// @param matData array of arrays to populate matrix with
+        ///
+        /// @throws std::invalid_argument if initializer list is empty
         Matrix(const std::initializer_list<std::initializer_list<T>>& matData)
         {
             if (matData.size() == 0)
@@ -174,7 +179,7 @@ class Matrix
         }
 
         ///--------------------------------------------------------
-        /// @brief Operator overload of *, implements matrix dot product
+        /// @brief Operator overload of *, implements matrix element multiplication
         ///
         /// @param mat reference to rval matrix
         ///
@@ -197,7 +202,7 @@ class Matrix
             return outMat;
         }
 
-        /// @brief Operator overload of /, implements number division of matrix
+        /// @brief Operator overload of /, implements matrix element division
         ///
         /// @param num to divide matrix by
         ///
@@ -611,21 +616,7 @@ class Matrix
         /// Q will be under .first, R under .second
         std::pair<Matrix<T>, Matrix<T>> qr_decompose()
         {
-            // Setup Q matrix
-            Matrix<T> Q;
-            Q.setCol(0, getCol(0));
 
-            for (size_t i = 1; i < m_cols; i++)
-            {
-                Matrix<T> colMat(m_rows, 1);
-                colMat.setCol(getCol(i));
-
-                Matrix<T> projCol(m_rows, 1);
-                for (size_t j = 1; j < i+1; j++)
-                {
-
-                }
-            }
         };
 
         ///--------------------------------------------------------
@@ -653,6 +644,7 @@ class Matrix
             T sum = 0;
             for (size_t i = 0; i < m_rows * m_cols; i++)
             {
+                // do not replace with pow, need to account for custom types
                 sum += get_data()[i] * get_data()[i];
             }
 
@@ -733,7 +725,7 @@ class Matrix
         ///--------------------------------------------------------
         /// @brief Finds the row containing the most zeros
         ///
-        /// @note if no zeros are found, row 1 (index 0) will be returned
+        /// @note if no zeros are found in matrix, row 1 (index 0) will be returned
         ///
         /// @returns index of row with most zeros
         size_t _find_zeros_row() const
@@ -746,7 +738,7 @@ class Matrix
                 size_t zeroCount = 0;
                 for (size_t j = 0; j < m_cols; j++)
                 {
-                    if (get(i,j) == 0)
+                    if (get(i,j) == (T) 0)
                     {
                         zeroCount++;
                     }

@@ -57,5 +57,19 @@ int main()
 
     cout << test << endl;
 
+    cout << "----------------------" << endl;
+
+    Vector<double> vect({2,3,4});
+    Vector<double> vect2({5,6,7});
+
+    cout << vect << endl;
+    cout << vect*vect2 << endl;
+    cout << vect.crossR3(vect2) << endl;
+
+    cout << vect.magnitude() << endl;
+    cout << vect2.magnitude() << endl;
+
+    cout << vect.cosineAng(vect2) << endl;
+
     return 0;
 }
