@@ -350,6 +350,25 @@ class Matrix
         };
 
         ///--------------------------------------------------------
+        /// @brief Sets values for an entire row, rowData must have same length as matrix width
+        /// Uses a Vector input
+        ///
+        /// @param row row to overwrite
+        /// @param rowData data for row write
+        void setRow(const size_t& row, const Vector<T> rowData)
+        {
+            if (rowData.size() != m_cols)
+            {
+                throw std::invalid_argument("Row set vector length must be same as matrix width");
+            }
+
+            for(size_t i = 0; i < m_cols; i++)
+            {
+                set(row, i, rowData.get(i));
+            }
+        };
+
+        ///--------------------------------------------------------
         /// @brief Sets values for an entire column, colData must have same length as matrix hieght
         ///
         /// @param col column to overwrite
@@ -364,6 +383,24 @@ class Matrix
             for(size_t i = 0; i < m_rows; i++)
             {
                 set(i, col, colData.at(i));
+            }
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Sets values for an entire column, colData must have same length as matrix hieght
+        ///
+        /// @param col column to overwrite
+        /// @param colData data for column write
+        void setCol(const size_t& col, const Vector<T> colData)
+        {
+            if (colData.size() != m_rows)
+            {
+                throw std::invalid_argument("Column set vector length must be same as matrix hieght");
+            }
+
+            for(size_t i = 0; i < m_rows; i++)
+            {
+                set(i, col, colData.get(i));
             }
         };
 
@@ -433,29 +470,35 @@ class Matrix
         };
 
         ///--------------------------------------------------------
-        /// @brief Reads the requested row from the matrix and return left to right, returns in matrix
+        /// @brief Reads the requested row from the matrix and return left to right, returns in vector obj form
         ///
         /// @param row row to read and return
         ///
         /// @return contents of row [row], returned as matrix
-        Matrix<T> getRowMat(const size_t& row)
+        Vector<T> getRowVec(const size_t& row)
         {
-            Matrix<T> outMat(1, m_cols);
-            outMat.setRow(0, getRow(row));
-            return outMat;
+            Vector<T> outVec(m_cols);
+            for (size_t i = 0; i < m_cols; i++)
+            {
+                outVec.set(i, get(row, i));
+            }
+            return outVec;
         };
 
         ///--------------------------------------------------------
-        /// @brief Reads the requested column from the matrix and return top to bottom, returns in matrix
+        /// @brief Reads the requested column from the matrix and return top to bottom, returns in vector obj form
         ///
         /// @param row column to read and return
         ///
         /// @return contents of column [col], returned as matrix
-        Matrix<T> getColMat(const size_t& col)
+        Vector<T> getColVec(const size_t& col)
         {
-            Matrix<T> outMat(m_rows, 1);
-            outMat.setCol(0, getCol(col));
-            return outMat;
+            Vector<T> outVec(m_rows);
+            for (size_t i = 0; i < m_rows; i++)
+            {
+                outVec.set(i, get(i, col));
+            }
+            return outVec;
         };
 
         ///--------------------------------------------------------
@@ -616,7 +659,35 @@ class Matrix
         /// Q will be under .first, R under .second
         std::pair<Matrix<T>, Matrix<T>> qr_decompose()
         {
+            std::pair<Matrix<T>, Matrix<T>> QR_set = {Matrix<T>(m_rows, m_cols), Matrix<T>(m_rows, m_cols)};
 
+            // Start with Q matrix
+            // Create list of previous orthogonal components
+            std::vector<Vector<T>> prevOrthoComps;
+            for (size_t i = 0; i < m_cols; i++)
+            {
+                Vector<T> q_vec = getColVec(i);
+                // subtract inner products of previous orthogonal components
+                for (size_t j = i; j > 0; j--)
+                {
+                    q_vec = q_vec - (prevOrthoComps[j - 1] * (q_vec * prevOrthoComps[j - 1]));
+                }
+                prevOrthoComps.push_back(q_vec.normalize());
+            }
+
+            // create matrix out of calculated ortogonal components
+            for(size_t i = 0; i < prevOrthoComps.size(); i++)
+            {
+                QR_set.first.setCol(i, prevOrthoComps[i]);
+            }
+
+            // Use Q to create R: Q(T)A = Q(T)(QR) = (I)R = R
+
+            QR_set.second = QR_set.first.transpose() % *this;
+            // Filter tiny inaccuracies in the matrix resulting in non-zero values in lower tri
+            //QR_set.second = QR_set.second.minFilter(0);
+
+            return QR_set;
         };
 
         ///--------------------------------------------------------

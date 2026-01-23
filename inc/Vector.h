@@ -101,7 +101,27 @@ class Vector
         /// @brief Destructor
         ~Vector()
         {
-            delete vec_data;
+            delete[] vec_data;
+        }
+
+        ///--------------------------------------------------------
+        /// @brief Assignment operator overload
+        ///
+        /// @param vec vector to assign from
+        ///
+        /// @return dereferenced pointer to self
+        Vector<T> operator=(Vector<T> const& vec)
+        {
+            // skip if being assigned to self
+            if(this != &vec)
+            {
+                delete[] vec_data;
+                m_length = vec.size();
+                vec_data = new T[m_length];
+
+                memcpy(vec_data, vec.get_data(), sizeof(T) * m_length);
+            }
+            return *this;
         }
 
         ///--------------------------------------------------------
@@ -151,7 +171,7 @@ class Vector
         }
 
         ///--------------------------------------------------------
-        /// @brief Operator overload of *, implements vector dot product
+        /// @brief Operator overload of *, implements vector dot/inner product
         ///
         /// @param vec vector to dot product with
         ///
@@ -323,7 +343,8 @@ class Vector
         /// @return normalized vector
         Vector<T> normalize() const
         {
-            return *this / magnitude();
+            Vector<T> cpy = *this;
+            return cpy / magnitude();
         }
 
         ///--------------------------------------------------------
