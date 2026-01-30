@@ -18,6 +18,13 @@
 #include "Complex_C.h"
 #include "Complex_P.h"
 
+// Matrix inversion method to use by default
+// uncomment only one
+///--------------------------------------------------------
+#define INVERSE_QR_METHOD // fastest
+//#define INVERSE_ADJ_METHOD // slowest
+///--------------------------------------------------------
+
 /// @brief Templated class for storing, acsessing and performing operations on a matrix of values
 template <typename T>
 class Matrix
@@ -638,10 +645,10 @@ class Matrix
         };
 
         ///--------------------------------------------------------
-        /// @brief Calculate the inverse matrix
+        /// @brief Calculate the inverse matrix, uses adjoint method
         ///
         /// @return the inverse matrix
-        Matrix<T> inverse()
+        Matrix<T> inverse_adj()
         {
             T det = determinant();
             if (det == 0)
@@ -650,6 +657,31 @@ class Matrix
             }
 
             return adjoint() / det;
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Calculate the inverse matrix, uses QR method
+        ///
+        /// @return the inverse matrix
+        Matrix<T> inverse_qr()
+        {
+            auto QR_decom = qr_decompose();
+            return QR_decom.second.inverse_adj() % QR_decom.first.transpose();
+        };
+
+        ///--------------------------------------------------------
+        /// @brief Calculate the inverse matrix, uses QR method by default
+        ///
+        /// @return the inverse matrix
+        Matrix<T> inverse()
+        {
+            #ifdef INVERSE_QR_METHOD
+            return inverse_qr();
+            #endif
+
+            #ifdef INVERSE_ADJ_METHOD
+            return inverse_adj();
+            #endif
         };
 
         ///--------------------------------------------------------
@@ -684,8 +716,16 @@ class Matrix
             // Use Q to create R: Q(T)A = Q(T)(QR) = (I)R = R
 
             QR_set.second = QR_set.first.transpose() % *this;
-            // Filter tiny inaccuracies in the matrix resulting in non-zero values in lower tri
-            //QR_set.second = QR_set.second.minFilter(0);
+
+            // clean out double innaccuracy in lower R triangle by zeroing elements
+            for (size_t row = 1; row < m_rows; row++)
+            {
+                for(size_t col = 0; col < m_cols; col++)
+                {
+                    QR_set.second.set(row, col, (T)0);
+                    if (col == row - 1) break;
+                }
+            }
 
             return QR_set;
         };
@@ -794,13 +834,15 @@ class Matrix
         };
 
         ///--------------------------------------------------------
-        /// @brief Finds the row containing the most zeros
+        /// @brief Finds the row containing the most zeros (or cells below abosolute limit)
         ///
         /// @note if no zeros are found in matrix, row 1 (index 0) will be returned
         ///
         /// @returns index of row with most zeros
         size_t _find_zeros_row() const
         {
+            #define ABS_LIM 1e-12
+
             size_t highestZerosCount = 0;
             size_t zerosRow = 0;
 
@@ -809,9 +851,26 @@ class Matrix
                 size_t zeroCount = 0;
                 for (size_t j = 0; j < m_cols; j++)
                 {
-                    if (get(i,j) == (T) 0)
+                    if constexpr (std::is_same_v<T, Complex_C_t>)
                     {
-                        zeroCount++;
+                        if (get(i,j).absolute() == 0 or std::abs(get(i,j).absolute()) < ABS_LIM)
+                        {
+                            zeroCount++;
+                        }
+                    }
+                    else if constexpr (std::is_same_v<T, Complex_P_t>)
+                    {
+                        if (get(i,j).m_mag == 0 or std::abs(get(i,j).m_mag) < ABS_LIM)
+                        {
+                            zeroCount++;
+                        }
+                    }
+                    else
+                    {
+                        if (get(i,j) == (T) 0 or std::abs(get(i,j)) < ABS_LIM)
+                        {
+                            zeroCount++;
+                        }
                     }
                 }
 
