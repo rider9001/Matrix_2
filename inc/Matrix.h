@@ -665,8 +665,8 @@ class Matrix
         /// @return the inverse matrix
         Matrix<T> inverse_qr()
         {
-            auto QR_decom = qr_decompose();
-            return QR_decom.second.inverse_adj() % QR_decom.first.transpose();
+            auto [Q_mat, R_mat] = qr_decompose();
+            return R_mat.inverse_adj() % Q_mat.transpose();
         };
 
         ///--------------------------------------------------------
@@ -732,6 +732,8 @@ class Matrix
 
         ///--------------------------------------------------------
         /// @brief Returns a matrix with each value of the input reciprocated
+        /// Zero elements will be retained at zero
+        ///
         ///
         /// @return reciprocated matrix
         Matrix<T> reciprocal()
@@ -740,7 +742,10 @@ class Matrix
 
             for (size_t i = 0; i < m_rows * m_cols; i++)
             {
-                outMat.get_data()[i] = 1 / m_data[i];
+                if (outMat.get_data()[i] != (T) 0)
+                {
+                    outMat.get_data()[i] = (T)1 / m_data[i];
+                }
             }
 
             return outMat;

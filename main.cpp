@@ -42,7 +42,7 @@ Matrix<double> gen_random_mat(size_t len, double lower, double upper);
 
 int main()
 {
-    Matrix<double> test = gen_random_mat(20, 0, 10);
+    Matrix<double> test = gen_random_mat(10, 0, 10);
 
     Timer t;
 
@@ -56,10 +56,16 @@ int main()
     cout << "-----R------" << endl;
     cout << QR_set.second << endl;
 
+    cout << "-----R^-1-----" << endl;
+    cout << QR_set.second.inverse() << endl;
+
     t.reset();
     cout << "-----QR-------" << endl;
     cout << test.inverse() << endl;
     cout << t.elapsed() << " sec" << endl;
+
+    cout << "-----proof-----" << endl;
+    cout << test % test.inverse() << endl;
 
     /*
     vec = {2,4,3};
