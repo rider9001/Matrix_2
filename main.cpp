@@ -42,61 +42,52 @@ Matrix<double> gen_random_mat(size_t len, double lower, double upper);
 
 int main()
 {
-    Matrix<double> test = gen_random_mat(10, 0, 10);
+    Matrix<double> test = gen_random_mat(2, 0, 100);
 
     Timer t;
 
-    auto QR_set = test.qr_decompose();
     cout << "-----A------" << endl;
     cout << test << endl;
 
-    cout << "-----Q------" << endl;
-    cout << QR_set.first << endl;
+    // cout << "-----Q------" << endl;
+    // cout << QR_set.first << endl;
 
-    cout << "-----R------" << endl;
-    cout << QR_set.second << endl;
+    // cout << "-----R------" << endl;
+    // cout << QR_set.second << endl;
 
-    cout << "-----R^-1-----" << endl;
-    cout << QR_set.second.inverse() << endl;
+    // cout << "-----R^-1-----" << endl;
+    // cout << QR_set.second.inverse() << endl;
 
+    // t.reset();
+    // cout << "-----QR-------" << endl;
+    // auto inv = test.inverse();
+    // cout << inv << endl;
+    // cout << t.elapsed() * 1e6 << " micros" << endl;
+
+    // cout << "-----proof-----" << endl;
+    // cout << test % inv << endl;
+
+    cout << "Egienvalues via QR convergence:" << endl;
     t.reset();
-    cout << "-----QR-------" << endl;
-    cout << test.inverse() << endl;
-    cout << t.elapsed() << " sec" << endl;
-
-    cout << "-----proof-----" << endl;
-    cout << test % test.inverse() << endl;
-
-    /*
-    vec = {2,4,3};
-    test.setCol(1, vec);
-    col = test.getCol(1);
-    cout << "Col: ";
-    for (auto num : col)
+    auto eigenvalues = test.eigenvalues();
+    for(auto val : eigenvalues)
     {
-        cout << num << ", ";
+        cout << val << ", ";
     }
     cout << endl;
 
-    cout << test << endl;
-
-    cout << "----------------------" << endl;
-
-    Vector<double> vect({2,3,4});
-    Vector<double> vect2({5,6,7});
-
-    cout << vect << endl;
-    cout << vect*vect2 << endl;
-    cout << vect.crossR3(vect2) << endl;
-
-    cout << vect.magnitude() << endl;
-    cout << vect2.magnitude() << endl;
-
-    cout << vect.cosineAng(vect2) << endl;
-
-    vect2 = vect;
-    cout << vect2 << endl;
-    */
+    cout << "Eigenvectors:" << endl;
+    auto eigenvectors = test.eigenvectors();
+    for (size_t i = 0; i < eigenvectors.size(); i++)
+    {
+        auto Vec = eigenvectors.at(i).internal_norm();
+        for (size_t j = 0; j < Vec.size(); j++)
+        {
+            cout << Vec.get(j) << ", ";
+        }
+        cout << endl;
+    }
+    cout << t.elapsed() * 1e6 << " micros" << endl;
 
     return 0;
 }
@@ -106,7 +97,7 @@ Matrix<double> gen_random_mat(size_t len, double lower, double upper)
     Matrix<double> outMat(len, len);
 
     srandom(time(NULL));
-    const long max_rand = 1000000L;
+    const long max_rand = upper;
 
     for (size_t i = 0; i < len; i++)
     {

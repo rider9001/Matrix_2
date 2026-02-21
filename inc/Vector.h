@@ -348,6 +348,57 @@ class Vector
         }
 
         ///--------------------------------------------------------
+        /// @brief Normalizes by absolute smallest value
+        ///
+        /// @return internally normalized value
+        Vector<T> internal_norm()
+        {
+            Vector<T> cpy = *this;
+            T smallest;
+            if constexpr (std::is_same_v<T, Complex_C_t>)
+            {
+                smallest = cpy.get(0).absolute();
+            }
+            else if constexpr (std::is_same_v<T, Complex_P_t>)
+            {
+                smallest = cpy.get(0).mag();
+            }
+            else
+            {
+                // by default attempts to use the std abs, for user-defined types add another 'if constexpr'
+                smallest = std::abs(cpy.get(0));
+            }
+
+            for (size_t i = 1; i < cpy.size(); i++)
+            {
+                if constexpr (std::is_same_v<T, Complex_C_t>)
+                {
+                    if (cpy.get(i).absolute() < smallest)
+                    {
+                        smallest = cpy.get(i).absolute();
+                    }
+                }
+                else if constexpr (std::is_same_v<T, Complex_P_t>)
+                {
+                    if (cpy.get(i).mag() < smallest)
+                    {
+                        smallest = cpy.get(i).mag();
+                    }
+                }
+                else
+                {
+                    // by default attempts to use the std abs, for user-defined types add another 'if constexpr'
+                    if (std::abs(cpy.get(i)) < smallest)
+                    {
+                        smallest = std::abs(cpy.get(i));
+                    }
+                }
+            }
+
+            return cpy / smallest;
+        }
+
+        ///--------------------------------------------------------
         /// @brief returns value at the index given
         ///
         /// @param index index to read

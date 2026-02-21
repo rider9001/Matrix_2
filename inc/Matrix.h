@@ -17,6 +17,7 @@
 #include "Vector.h"
 #include "Complex_C.h"
 #include "Complex_P.h"
+#include "Poly.h"
 
 // Matrix inversion method to use by default
 // uncomment only one
@@ -24,6 +25,11 @@
 #define INVERSE_QR_METHOD // fastest
 //#define INVERSE_ADJ_METHOD // slowest
 ///--------------------------------------------------------
+
+/// Max number of QR interations to be used when calculating eigenvalues
+#define MAX_QR_EIGEN_ITER 1000
+/// Limit for convergence
+#define QR_CONVERGENCE_LIMIT 1e-12
 
 /// @brief Templated class for storing, acsessing and performing operations on a matrix of values
 template <typename T>
@@ -601,7 +607,13 @@ class Matrix
                 throw std::invalid_argument("Matrix must be square to have a determinant");
             }
 
-            if (m_cols == 2)
+            if (m_cols == 3)
+            {
+                return (get(0,0) * (get(1,1) * get(2,2) - get(2,1) * get(1,2)))
+                      -(get(1,0) * (get(0,1) * get(2,2) - get(2,1) * get(0,2)))
+                      +(get(2,0) * (get(0,1) * get(1,2) - get(1,1) * get(0,2)));
+            }
+            else if (m_cols == 2)
             {
                 return get(0,0) * get(1,1) - get(1,0) * get(0,1);
             }
@@ -764,7 +776,7 @@ class Matrix
                 sum += get_data()[i] * get_data()[i];
             }
 
-            // Dynamically chooses which routine to implement depending on complex type
+            // chooses which routine to compile depending on complex type
             if constexpr (std::is_same_v<T, Complex_C_t>)
             {
                 sum = powReal(sum, 0.5);
@@ -779,6 +791,109 @@ class Matrix
             }
 
             return *this / sum;
+        }
+
+        ///--------------------------------------------------------
+        /// @brief Calculates eigenvalues for the matrix, matrix must be square
+        /// Uses QR convergence
+        /// max iteration number defined by MAX_QR_EIGEN_ITER
+        /// convergence limit defined by
+        ///
+        /// TODO: fix this function, does not work currently
+        ///
+        /// @return vector list of eigen values (convergence not guarenteed)
+        std::vector<T> eigenvalues()
+        {
+            if (m_cols != m_rows)
+            {
+                throw std::invalid_argument("Matrix must be square to have eigenvalues");
+            }
+
+            auto QR_mat = this->qr_decompose();
+            auto mat = QR_mat.second % QR_mat.first;
+
+            // get diagonals for convergence checking
+            std::vector<T> last_vals(m_cols);
+            for (size_t i = 0; i < m_cols; i++)
+            {
+                last_vals.at(i) = get(i,i);
+            }
+
+            bool converged = false;
+            size_t iter_count = 1;
+
+            while(!converged && (iter_count < MAX_QR_EIGEN_ITER))
+            {
+                QR_mat = mat.qr_decompose();
+                mat = QR_mat.second % QR_mat.first;
+
+                std::vector<T> cur_vals(m_cols);
+                for (size_t i = 0; i < m_cols; i++)
+                {
+                    cur_vals.at(i) = mat.get(i,i);
+                }
+
+                converged = true;
+                for(size_t i = 0; i < cur_vals.size(); i++)
+                {
+                    if constexpr (std::is_same_v<T, Complex_C_t>)
+                    {
+                        if ((last_vals.at(i) - cur_vals.at(i)).absolute() > QR_CONVERGENCE_LIMIT)
+                        {
+                            converged = false;
+                            break;
+                        }
+                    }
+                    else if constexpr (std::is_same_v<T, Complex_P_t>)
+                    {
+                        if (std::abs((last_vals.at(i) - cur_vals.at(i)).real()) > QR_CONVERGENCE_LIMIT)
+                        {
+                            converged = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        // by default attempts to use the std abs, for user-defined types add another 'if constexpr'
+                        if (std::abs(last_vals.at(i) - cur_vals.at(i)) > QR_CONVERGENCE_LIMIT)
+                        {
+                            converged = false;
+                            break;
+                        }
+                    }
+                }
+
+                last_vals = cur_vals;
+                iter_count++;
+            }
+
+            return last_vals;
+        }
+
+        ///--------------------------------------------------------
+        /// @brief Calculates eigenvectors for the matrix, matrix must be square
+        ///
+        /// @return list of eigenvectors
+        std::vector<Vector<T>> eigenvectors()
+        {
+            // (A-λI)v=0 -> v = -(A-λI)
+
+            std::vector<Vector<T>> e_vectors;
+
+            auto e_values = eigenvalues();
+            for(size_t val = 0; val < e_values.size(); val++)
+            {
+                auto mat = *this*-1 - (Matrix<T>::identity(m_cols) * e_values.at(val));
+                Vector<T> vec(m_cols);
+                for (size_t i = 0; i < m_cols; i++)
+                {
+                    vec.set(i, mat.get(i,i));
+                }
+
+                e_vectors.push_back(vec);
+            }
+
+            return e_vectors;
         }
 
         ///--------------------------------------------------------
@@ -829,7 +944,7 @@ class Matrix
         /// @throws std::invalid_argument if row/col location is out of bounds
         size_t _trans_coord(const size_t& row, const size_t& col) const
         {
-            if (!_check_bounds(row, col))
+            if (!_check_bounds(row, col)) [[unlikely]]
             {
                std::string err = _gen_coord_err_string(row, col);
                throw std::invalid_argument(err.c_str());
@@ -846,8 +961,6 @@ class Matrix
         /// @returns index of row with most zeros
         size_t _find_zeros_row() const
         {
-            #define ABS_LIM 1e-12
-
             size_t highestZerosCount = 0;
             size_t zerosRow = 0;
 
@@ -858,21 +971,21 @@ class Matrix
                 {
                     if constexpr (std::is_same_v<T, Complex_C_t>)
                     {
-                        if (get(i,j).absolute() == 0 or std::abs(get(i,j).absolute()) < ABS_LIM)
+                        if (get(i,j).absolute() == 0)
                         {
                             zeroCount++;
                         }
                     }
                     else if constexpr (std::is_same_v<T, Complex_P_t>)
                     {
-                        if (get(i,j).m_mag == 0 or std::abs(get(i,j).m_mag) < ABS_LIM)
+                        if (get(i,j).m_mag == 0)
                         {
                             zeroCount++;
                         }
                     }
                     else
                     {
-                        if (get(i,j) == (T) 0 or std::abs(get(i,j)) < ABS_LIM)
+                        if (get(i,j) == (T) 0)
                         {
                             zeroCount++;
                         }
@@ -898,8 +1011,8 @@ class Matrix
         /// @returns is coordinate in bounds of this array?
         bool _check_bounds(const size_t& row, const size_t& col) const
         {
-            // True if both coords are in bounds
-            return (row < m_rows) and (col < m_cols);
+            // True if both coords are in bounds (size_t is unsigned, cannot be below 0)
+            return (row < m_rows) && (col < m_cols);
         };
 
         ///--------------------------------------------------------
