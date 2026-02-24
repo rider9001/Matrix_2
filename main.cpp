@@ -51,7 +51,7 @@ int main()
 {
     srandom(time(NULL));
 
-    const size_t mat_size = 3;
+    const size_t mat_size = 2;
     const double lower = 1;
     const double upper = 10;
 
@@ -80,7 +80,7 @@ int main()
     // cout << "-----proof-----" << endl;
     // cout << test % inv << endl;
 
-    cout << "Egienvalues via QR convergence:" << endl;
+    cout << "Eigenvalues via QR convergence:" << endl;
     t.reset();
     auto eigenvalues = test.eigenvalues();
     for(auto val : eigenvalues)
@@ -89,13 +89,12 @@ int main()
     }
     cout << endl;
 
-    Vector<double> test_sol = gen_random_vec(mat_size, lower, upper);
-
-    cout << "Solutions: " << test_sol << endl;
-
-    cout << "RREF augmented form: " << endl;
-    cout << test.RREF_aug(test_sol) << endl;
-    cout << "Derivations: " << test.derive_var(test_sol) << endl;
+    cout << "Eigenvectors: " << endl;
+    std::vector<Vector<double>> e_vecs = test.eigenvectors();
+    for(Vector<double> vec : e_vecs)
+    {
+        cout << vec << endl;
+    }
     cout << t.elapsed() * 1e6 << " micros" << endl;
 
     return 0;

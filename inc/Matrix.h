@@ -149,7 +149,7 @@ class Matrix
         /// @param mat reference to rval matrix
         ///
         /// @return result of summed matricies
-        Matrix<T> operator+(Matrix<T> const& mat)
+        Matrix<T> operator+(Matrix<T> const& mat) const
         {
             if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
@@ -173,7 +173,7 @@ class Matrix
         /// @param mat reference to rval matrix
         ///
         /// @return result of subtracted matricies
-        Matrix<T> operator-(Matrix<T> const& mat)
+        Matrix<T> operator-(Matrix<T> const& mat) const
         {
             if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
@@ -197,7 +197,7 @@ class Matrix
         /// @param mat reference to rval matrix
         ///
         /// @return result of dot product matricies
-        Matrix<T> operator*(Matrix<T> const& mat)
+        Matrix<T> operator*(Matrix<T> const& mat) const
         {
             if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
@@ -220,7 +220,7 @@ class Matrix
         /// @param num to divide matrix by
         ///
         /// @return multiplied matrix
-        Matrix<T> operator/(T const& num)
+        Matrix<T> operator/(T const& num) const
         {
             Matrix<T> outMat(m_rows, m_cols);
 
@@ -238,7 +238,7 @@ class Matrix
         /// @param mat reference to rval matrix
         ///
         /// @return result of dot product matricies
-        Matrix<T> operator%(Matrix<T> const& mat)
+        Matrix<T> operator%(Matrix<T> const& mat) const
         {
             if (m_cols != mat.getRowCount())
             {
@@ -270,7 +270,7 @@ class Matrix
         /// @param mat rval mat to compare
         ///
         /// @return are matricies equal in dimension and content?
-        bool operator==(Matrix<T> const& mat)
+        bool operator==(Matrix<T> const& mat) const
         {
             if (mat.getColCount() != m_cols || mat.getRowCount() != m_rows)
             {
@@ -296,7 +296,7 @@ class Matrix
         /// @param mat rval mat to compare
         ///
         /// @return are matricies not equal in dimension || content?
-        bool operator!=(Matrix<T> const& mat)
+        bool operator!=(Matrix<T> const& mat) const
         {
             return !(*this == mat);
         };
@@ -309,7 +309,7 @@ class Matrix
         /// @param num to multiply matrix by
         ///
         /// @return multiplied matrix
-        Matrix<T> operator*(double const& num)
+        Matrix<T> operator*(double const& num) const
         {
             Matrix<T> outMat(m_rows, m_cols);
 
@@ -876,54 +876,28 @@ class Matrix
         /// @return list of eigenvectors
         std::vector<Vector<T>> eigenvectors() const
         {
-            RREF();
-            return std::vector<Vector<T>>();
-        }
+            Vector<T> e_vals = eigenvalues();
+            std::vector<Vector<T>> e_vecs;
 
-        ///--------------------------------------------------------
-        /// @brief Returns matrix in reduced row echelon form
-        /// Assumes that all variables have a solution (no all-zero columns)
-        ///
-        /// @return RREF of the matrix
-        Matrix<T> RREF() const
-        {
-            if (m_cols != m_rows)
+            // Create list of zeros for solutions
+            Vector<T> zeros(e_vals.size());
+            for (size_t i = 0; i < e_vals.size(); i++)
             {
-                throw std::invalid_argument("Matrix must be square to have an RREF");
+                zeros.set(i, 0);
             }
 
-            // create augmented matrix with zeros row
-            Matrix<T> augmented_mat(m_rows, m_cols);
-            for (size_t row = 0; row < m_rows; row++)
+            for (size_t i = 0; i < e_vals.size(); i++)
             {
-                for (size_t col = 0; col < m_cols; col++)
-                {
-                    augmented_mat.set(row, col, get(row, col));
-                }
+                // Create the eigenvalue subtracted matrix
+                Matrix<T> eval_sub_mat = *this - (Matrix<T>::identity(m_cols) * e_vals.get(i));
+
+                std::cout << eval_sub_mat << std::endl << std::endl;
+
+                // get derivation from all zeros solution
+                e_vecs.push_back(eval_sub_mat.derive_var(zeros));
             }
 
-            // multiply first row to make first pivot 1
-            Vector<T> last_row = augmented_mat.getRowVec(0);
-            last_row = last_row * (1 / last_row.get(0));
-            augmented_mat.setRow(0, last_row);
-
-            // guassian eliminate matrix into reduced row echelon form
-            // col is the current pivot
-            for (size_t col = 0; col < m_cols; col++)
-            {
-                last_row = augmented_mat.getRowVec(col);
-
-                // use the last row to reduce [row] variables to zero
-                for (size_t row = 1 + col; row < m_rows; row++)
-                {
-                    Vector<T> cur_row = augmented_mat.getRowVec(row);
-                    cur_row = cur_row - (last_row * cur_row.get(col));
-                    cur_row = cur_row * (1 / cur_row.get(col+1));
-                    augmented_mat.setRow(row, cur_row);
-                }
-            }
-
-            return augmented_mat;
+            return e_vecs;
         }
 
         ///--------------------------------------------------------
@@ -933,7 +907,7 @@ class Matrix
         /// @param solutions vector of solutions for the rows, must be equal in rank to matrix
         ///
         /// @return RREF of the matrix (of mx(n+1) dimensions)
-        Matrix<T> RREF_aug(const Vector<T>& solutions) const
+        Matrix<T> RREF(const Vector<T>& solutions) const
         {
             if (m_cols != m_rows)
             {
@@ -977,6 +951,18 @@ class Matrix
                 }
             }
 
+            // work backwards to reduce all non-pivot points to zero
+            for (int row = m_rows - 2; row >= 0; row--)
+            {
+                last_row = augmented_mat.getRowVec(row + 1);
+                for (int sub_row = row; sub_row >= 0; sub_row--)
+                {
+                    Vector<T> cur_row = augmented_mat.getRowVec(sub_row);
+                    cur_row = cur_row - last_row * cur_row.get(row+1);
+                    augmented_mat.setRow(sub_row, cur_row);
+                }
+            }
+
             return augmented_mat;
         }
 
@@ -988,20 +974,9 @@ class Matrix
         /// @return Vector list of variable values in diagonal order
         Vector<T> derive_var(const Vector<T>& solutions)
         {
-            auto rref_sol = RREF_aug(solutions);
+            auto rref_sol = RREF(solutions);
 
             Vector<T> derivations = rref_sol.getColVec(m_cols);
-
-            // backsolve values
-            for (int var = m_cols-2; var >= 0; var--)
-            {
-                T val = derivations.get(var);
-                for (size_t col = m_cols-1; col >= m_cols-var-1; col--)
-                {
-                    val = val - rref_sol.get(var, col) * derivations.get(col);
-                }
-                derivations.set(var, val);
-            }
 
             return derivations;
         }
