@@ -504,7 +504,7 @@ class Matrix
         /// @param row column to read and return
         ///
         /// @return contents of column [col], returned as matrix
-        Vector<T> getColVec(const size_t& col)
+        Vector<T> getColVec(const size_t& col) const
         {
             Vector<T> outVec(m_rows);
             for (size_t i = 0; i < m_rows; i++)
@@ -701,9 +701,10 @@ class Matrix
         ///
         /// @return Pair of <Q, R> matricies
         /// Q will be under .first, R under .second
-        std::pair<Matrix<T>, Matrix<T>> qr_decompose()
+        std::pair<Matrix<T>, Matrix<T>> qr_decompose() const
         {
-            std::pair<Matrix<T>, Matrix<T>> QR_set = {Matrix<T>(m_rows, m_cols), Matrix<T>(m_rows, m_cols)};
+            Matrix<T> Q_mat(m_rows, m_cols);
+            Matrix<T> R_mat(m_rows, m_cols);
 
             // Start with Q matrix
             // Create list of previous orthogonal components
@@ -722,24 +723,23 @@ class Matrix
             // create matrix out of calculated ortogonal components
             for(size_t i = 0; i < prevOrthoComps.size(); i++)
             {
-                QR_set.first.setCol(i, prevOrthoComps[i]);
+                Q_mat.setCol(i, prevOrthoComps[i]);
             }
 
-            // Use Q to create R: Q(T)A = Q(T)(QR) = (I)R = R
-
-            QR_set.second = QR_set.first.transpose() % *this;
+            // Use Q to create R: (Q^T)A = (Q^T)(QR) = (I)R = R
+            R_mat = Q_mat.transpose() % *this;
 
             // clean out double innaccuracy in lower R triangle by zeroing elements
             for (size_t row = 1; row < m_rows; row++)
             {
                 for(size_t col = 0; col < m_cols; col++)
                 {
-                    QR_set.second.set(row, col, (T)0);
+                    R_mat.set(row, col, (T)0);
                     if (col == row - 1) break;
                 }
             }
 
-            return QR_set;
+            return {Q_mat, R_mat};
         };
 
         ///--------------------------------------------------------
@@ -802,7 +802,7 @@ class Matrix
         /// TODO: fix this function, does not work currently
         ///
         /// @return vector list of eigen values (convergence not guarenteed)
-        std::vector<T> eigenvalues()
+        std::vector<T> eigenvalues() const
         {
             if (m_cols != m_rows)
             {
@@ -874,26 +874,136 @@ class Matrix
         /// @brief Calculates eigenvectors for the matrix, matrix must be square
         ///
         /// @return list of eigenvectors
-        std::vector<Vector<T>> eigenvectors()
+        std::vector<Vector<T>> eigenvectors() const
         {
-            // (A-λI)v=0 -> v = -(A-λI)
+            RREF();
+            return std::vector<Vector<T>>();
+        }
 
-            std::vector<Vector<T>> e_vectors;
-
-            auto e_values = eigenvalues();
-            for(size_t val = 0; val < e_values.size(); val++)
+        ///--------------------------------------------------------
+        /// @brief Returns matrix in reduced row echelon form
+        /// Assumes that all variables have a solution (no all-zero columns)
+        ///
+        /// @return RREF of the matrix
+        Matrix<T> RREF() const
+        {
+            if (m_cols != m_rows)
             {
-                auto mat = *this*-1 - (Matrix<T>::identity(m_cols) * e_values.at(val));
-                Vector<T> vec(m_cols);
-                for (size_t i = 0; i < m_cols; i++)
-                {
-                    vec.set(i, mat.get(i,i));
-                }
-
-                e_vectors.push_back(vec);
+                throw std::invalid_argument("Matrix must be square to have an RREF");
             }
 
-            return e_vectors;
+            // create augmented matrix with zeros row
+            Matrix<T> augmented_mat(m_rows, m_cols);
+            for (size_t row = 0; row < m_rows; row++)
+            {
+                for (size_t col = 0; col < m_cols; col++)
+                {
+                    augmented_mat.set(row, col, get(row, col));
+                }
+            }
+
+            // multiply first row to make first pivot 1
+            Vector<T> last_row = augmented_mat.getRowVec(0);
+            last_row = last_row * (1 / last_row.get(0));
+            augmented_mat.setRow(0, last_row);
+
+            // guassian eliminate matrix into reduced row echelon form
+            // col is the current pivot
+            for (size_t col = 0; col < m_cols; col++)
+            {
+                last_row = augmented_mat.getRowVec(col);
+
+                // use the last row to reduce [row] variables to zero
+                for (size_t row = 1 + col; row < m_rows; row++)
+                {
+                    Vector<T> cur_row = augmented_mat.getRowVec(row);
+                    cur_row = cur_row - (last_row * cur_row.get(col));
+                    cur_row = cur_row * (1 / cur_row.get(col+1));
+                    augmented_mat.setRow(row, cur_row);
+                }
+            }
+
+            return augmented_mat;
+        }
+
+        ///--------------------------------------------------------
+        /// @brief Returns matrix in augmented reduced row echelon form
+        /// Assumes that all variables have a solution (no all-zero columns)
+        ///
+        /// @param solutions vector of solutions for the rows, must be equal in rank to matrix
+        ///
+        /// @return RREF of the matrix (of mx(n+1) dimensions)
+        Matrix<T> RREF_aug(const Vector<T>& solutions) const
+        {
+            if (m_cols != m_rows)
+            {
+                throw std::invalid_argument("Matrix must be square to have an RREF");
+            }
+
+            if (m_cols != solutions.size())
+            {
+                throw std::invalid_argument("Incorrect number of solutions");
+            }
+
+            // create augmented matrix with zeros row
+            Matrix<T> augmented_mat(m_rows, m_cols + 1);
+            for (size_t row = 0; row < m_rows; row++)
+            {
+                for (size_t col = 0; col < m_cols; col++)
+                {
+                    augmented_mat.set(row, col, get(row, col));
+                }
+                augmented_mat.set(row, m_cols, solutions.get(row));
+            }
+
+            // multiply first row to make first pivot 1
+            Vector<T> last_row = augmented_mat.getRowVec(0);
+            last_row = last_row * (1 / last_row.get(0));
+            augmented_mat.setRow(0, last_row);
+
+            // guassian eliminate matrix into reduced row echelon form
+            // col is the current pivot
+            for (size_t col = 0; col < m_cols; col++)
+            {
+                last_row = augmented_mat.getRowVec(col);
+
+                // use the last row to reduce [row] variables to zero
+                for (size_t row = 1 + col; row < m_rows; row++)
+                {
+                    Vector<T> cur_row = augmented_mat.getRowVec(row);
+                    cur_row = cur_row - (last_row * cur_row.get(col));
+                    cur_row = cur_row * (1 / cur_row.get(col+1));
+                    augmented_mat.setRow(row, cur_row);
+                }
+            }
+
+            return augmented_mat;
+        }
+
+        ///--------------------------------------------------------
+        /// @brief Returns a vector containing derived values of variables given solutions vector
+        ///
+        /// @param solutions vector of solutions
+        ///
+        /// @return Vector list of variable values in diagonal order
+        Vector<T> derive_var(const Vector<T>& solutions)
+        {
+            auto rref_sol = RREF_aug(solutions);
+
+            Vector<T> derivations = rref_sol.getColVec(m_cols);
+
+            // backsolve values
+            for (int var = m_cols-2; var >= 0; var--)
+            {
+                T val = derivations.get(var);
+                for (size_t col = m_cols-1; col >= m_cols-var-1; col--)
+                {
+                    val = val - rref_sol.get(var, col) * derivations.get(col);
+                }
+                derivations.set(var, val);
+            }
+
+            return derivations;
         }
 
         ///--------------------------------------------------------

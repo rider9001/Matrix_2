@@ -9,6 +9,7 @@
 #include <chrono>
 
 #include "inc/Matrix.h"
+#include "inc/Vector.h"
 #include "inc/Complex.h"
 #include "inc/Poly.h"
 
@@ -38,11 +39,23 @@ public:
 };
 
 // Generate a random nxn matrix
-Matrix<double> gen_random_mat(size_t len, double lower, double upper);
+Matrix<double> gen_random_mat(const size_t& len, const double& lower, const double& upper);
+
+// Generate random n length vector
+Vector<double> gen_random_vec(const size_t& len, const double& lower, const double& upper);
+
+// Generate random number, between lower and upper
+long gen_random(const double& lower, const double& upper);
 
 int main()
 {
-    Matrix<double> test = gen_random_mat(2, 0, 100);
+    srandom(time(NULL));
+
+    const size_t mat_size = 3;
+    const double lower = 1;
+    const double upper = 10;
+
+    Matrix<double> test = gen_random_mat(mat_size, lower, upper);
 
     Timer t;
 
@@ -76,38 +89,47 @@ int main()
     }
     cout << endl;
 
-    cout << "Eigenvectors:" << endl;
-    auto eigenvectors = test.eigenvectors();
-    for (size_t i = 0; i < eigenvectors.size(); i++)
-    {
-        auto Vec = eigenvectors.at(i).internal_norm();
-        for (size_t j = 0; j < Vec.size(); j++)
-        {
-            cout << Vec.get(j) << ", ";
-        }
-        cout << endl;
-    }
+    Vector<double> test_sol = gen_random_vec(mat_size, lower, upper);
+
+    cout << "Solutions: " << test_sol << endl;
+
+    cout << "RREF augmented form: " << endl;
+    cout << test.RREF_aug(test_sol) << endl;
+    cout << "Derivations: " << test.derive_var(test_sol) << endl;
     cout << t.elapsed() * 1e6 << " micros" << endl;
 
     return 0;
 }
 
-Matrix<double> gen_random_mat(size_t len, double lower, double upper)
+long gen_random(const double& lower, const double& upper)
+{
+    const long max_rand = upper;
+    return lower + (upper - lower) * (random() % max_rand) / upper;
+}
+
+Matrix<double> gen_random_mat(const size_t& len, const double& lower, const double& upper)
 {
     Matrix<double> outMat(len, len);
-
-    srandom(time(NULL));
-    const long max_rand = upper;
 
     for (size_t i = 0; i < len; i++)
     {
         for(size_t j = 0; j < len; j++)
         {
-            double random_double = lower + (upper - lower) * (random() % max_rand) / upper;
-
-            outMat.set(i,j, random_double);
+            outMat.set(i,j, gen_random(lower, upper));
         }
     }
 
     return outMat;
+}
+
+Vector<double> gen_random_vec(const size_t& len, const double& lower, const double& upper)
+{
+    Vector<double> outVec(len);
+
+    for (size_t i = 0; i < len; i++)
+    {
+        outVec.set(i, gen_random(lower, upper));
+    }
+
+    return outVec;
 }
