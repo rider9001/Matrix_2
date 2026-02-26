@@ -151,7 +151,7 @@ Complex_C_t operator-(const Complex_C_t& com);
 void operator-=(Complex_C_t& lcom, const Complex_C_t& rcom);
 
 ///--------------------------------------------------------
-/// @brief Overload of +=, subtracts rreal from lcom
+/// @brief Overload of +=, adds rreal to lcom
 ///
 /// @param lcom left hand complex
 /// @param rcom right hand real
