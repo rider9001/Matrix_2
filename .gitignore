@@ -13,3 +13,9 @@ CMakeUserPresets.json
 
 bin
 .vscode/settings.json
+
+perf.data
+perf.data.old
+trace.folded
+trace.perf
+trace.svg

@@ -97,7 +97,7 @@ int main()
     }
     cout << t.elapsed() * 1e6 << " micros" << endl;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 long gen_random(const double& lower, const double& upper)

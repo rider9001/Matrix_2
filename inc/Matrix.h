@@ -891,8 +891,6 @@ class Matrix
                 // Create the eigenvalue subtracted matrix
                 Matrix<T> eval_sub_mat = *this - (Matrix<T>::identity(m_cols) * e_vals.get(i));
 
-                std::cout << eval_sub_mat << std::endl << std::endl;
-
                 // get derivation from all zeros solution
                 e_vecs.push_back(eval_sub_mat.derive_var(zeros));
             }
