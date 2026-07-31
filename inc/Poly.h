@@ -112,4 +112,12 @@ Complex_C_t getValCompressedPoly(const Complex_C_t x, const Poly_Coeff_t& compre
 /// @param compressedPoly complex polynomial
 ///
 /// @return factor list
-std::vector< std::pair<double, Complex_C_t> > FactorizePoly(const Poly_Coeff_t& compressedPoly);
+std::vector< Poly_factor_t > FactorizePoly(const Poly_Coeff_t& compressedPoly);
+
+/// ------------------------------------------
+/// @brief Factorizes a 2nd order complex polynomial
+///
+/// @param compressedPoly complex polynomial
+///
+/// @return factor list (always size 2)
+std::vector< Poly_factor_t > QuadraticFactorize(const Poly_Coeff_t& compressedPoly);

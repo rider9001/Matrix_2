@@ -49,20 +49,24 @@ long gen_random(const double& lower, const double& upper);
 
 int main()
 {
-    srandom(time(NULL));
+    // srandom(time(NULL));
 
-    const size_t mat_size = 2;
-    const double lower = 1;
-    const double upper = 10;
+    // const size_t mat_size = 10;
+    // const double lower = 1;
+    // const double upper = 10;
 
-    Matrix<double> test = gen_random_mat(mat_size, lower, upper);
+    // Matrix<double> test = gen_random_mat(mat_size, lower, upper);
 
-    Timer t;
+    // Timer t;
+    // t.reset();
 
-    cout << "-----A------" << endl;
-    cout << test << endl;
+    // cout << "-----A------" << endl;
+    // cout << test << endl;
 
-    // cout << "-----Q------" << endl;
+    // cout << "-----A-1----" << endl;
+    // cout << test.inverse() << endl;
+    // cout << endl;
+
     // cout << QR_set.first << endl;
 
     // cout << "-----R------" << endl;
@@ -80,22 +84,22 @@ int main()
     // cout << "-----proof-----" << endl;
     // cout << test % inv << endl;
 
-    cout << "Eigenvalues via QR convergence:" << endl;
-    t.reset();
-    auto eigenvalues = test.eigenvalues();
-    for(auto val : eigenvalues)
-    {
-        cout << val << ", ";
-    }
-    cout << endl;
+    // cout << "Eigenvalues via QR convergence:" << endl;
+    // auto eigenvalues = test.eigenvalues();
+    // for(auto val : eigenvalues)
+    // {
+    //     cout << val << ", ";
+    // }
+    // cout << endl;
 
-    cout << "Eigenvectors: " << endl;
-    std::vector<Vector<double>> e_vecs = test.eigenvectors();
-    for(Vector<double> vec : e_vecs)
-    {
-        cout << vec << endl;
-    }
-    cout << t.elapsed() * 1e6 << " micros" << endl;
+    // cout << t.elapsed() * 1e6 << " micros" << endl;
+
+    std::vector<Poly_factor_t> factors = {{1, 2}, {1, -2}, {1, -3}, {1, 12}};
+    auto compressed = CompressFactors(factors);
+
+    auto factorized = FactorizePoly(compressed);
+
+    cout << factorized << endl;
 
     return EXIT_SUCCESS;
 }

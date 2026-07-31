@@ -218,10 +218,14 @@ std::vector<Poly_factor_t> FactorizePoly(const Poly_Coeff_t& compressedPoly)
 {
     size_t maxRank = compressedPoly.size() - 1;
 
-    if (maxRank < 2)
+    if (maxRank == 2)
     {
-        throw std::invalid_argument("Polynomials below rank 2 have trivial solutions, and also break this algorithm,"
-                                    "might implement rank 1 at some point.");
+        // use quadratic equation
+        return QuadraticFactorize(compressedPoly);
+    }
+    else if (maxRank == 1)
+    {
+        return {{1, compressedPoly.at(0)}};
     }
 
     Complex_C_t first_nonzero_coeff;
@@ -288,13 +292,10 @@ std::vector<Poly_factor_t> FactorizePoly(const Poly_Coeff_t& compressedPoly)
             nextValues.at(i) = curVal - (getValCompressedPoly(curVal, compressedPoly) / sub_product);
         }
 
+        all_converged = true;
         for (size_t i = 0; i < currentValues.size(); i++)
         {
-            if (std::abs( currentValues.at(i).absolute() - nextValues.at(i).absolute() ) < MIN_DIFF_CONV_TEST)
-            {
-                all_converged = true;
-            }
-            else
+            if (!(std::abs( currentValues.at(i).absolute() - nextValues.at(i).absolute() ) < MIN_DIFF_CONV_TEST))
             {
                 // if any roots fail this test, continue iterations
                 all_converged = false;
@@ -314,4 +315,19 @@ std::vector<Poly_factor_t> FactorizePoly(const Poly_Coeff_t& compressedPoly)
     }
 
     return factors;
+}
+
+/// ------------------------------------------
+std::vector< Poly_factor_t > QuadraticFactorize(const Poly_Coeff_t& compressedPoly)
+{
+    const Complex_C_t a = compressedPoly.at(2);
+    const Complex_C_t b = compressedPoly.at(1);
+    const Complex_C_t c = compressedPoly.at(0);
+
+    const Complex_C_t root = powReal( (b * b) - (4 * a * c) , 0.5);
+
+    return {
+        {1, -((-b + root) / (2 * a))},
+        {1, -((-b - root) / (2 * a))}
+    };
 }

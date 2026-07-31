@@ -1027,7 +1027,7 @@ class Matrix
         /// @throws std::invalid_argument if row/col location is out of bounds
         size_t _trans_coord(const size_t& row, const size_t& col) const
         {
-            if (!_check_bounds(row, col)) [[unlikely]]
+            if (__builtin_expect(!_check_bounds(row, col), 0))
             {
                std::string err = _gen_coord_err_string(row, col);
                throw std::invalid_argument(err.c_str());
